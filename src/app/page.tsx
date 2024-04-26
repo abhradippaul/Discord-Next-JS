@@ -1,18 +1,26 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
-
-export default function Home() {
-  return (
-    <main>
-      <Button
-        onClick={() => {
-          signIn();
-        }}
-      >
-        {" "}
-        Click Me{" "}
-      </Button>
-    </main>
-  );
+import { useUserContextProvider } from "@/components/providers/UserContext";
+import { createUser } from "@/lib/db";
+import { findTheUser } from "@/lib/initial-profile";
+import { useSession } from "next-auth/react";
+import React, { useEffect } from "react";
+function page() {
+  const { user } = useUserContextProvider();
+  useEffect(() => {
+    (async () => {
+      if (user.status !== "pending") {
+        if (user.email) {
+          const res = await findTheUser(user.email);
+          console.log(res);
+          if (!res.success) {
+            await createUser(user.email, user.name, user.image);
+            console.log("User created successfully");
+          }
+        }
+      }
+    })();
+  }, [user]);
+  return <div>Create a server</div>;
 }
+
+export default page;
