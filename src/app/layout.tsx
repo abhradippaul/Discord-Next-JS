@@ -19,10 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressContentEditableWarning={true}>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(inter.className, "bg-white dark:bg-[#313338]")}
-        suppressContentEditableWarning={true}
+        suppressContentEditableWarning
       >
         <ProviderSession>
           <UserContext>
