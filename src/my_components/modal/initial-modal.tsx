@@ -20,13 +20,15 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FileUpload from "../file-upload";
-import { CldUploadWidget } from "next-cloudinary";
 import { Loader2 } from "lucide-react";
+import { createServer, isServerExist } from "@/lib/db";
+import { useUserContextProvider } from "@/components/providers/UserContext";
 
 function InitialModal() {
   const [isMounted, setIsMounted] = useState(false);
   const [imageInfo, setImageInfo] = useState({});
-
+  const [isServerUnique, setIsServerUnique] = useState(true);
+  const { user } = useUserContextProvider();
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -40,8 +42,10 @@ function InitialModal() {
 
   const isLoading = form.formState.isSubmitting;
 
-  const onSubmit = async (values: { name: string; imageUrl: any }) => {
+  const onSubmit = async (values: { name: string; imageUrl: string }) => {
     console.log(values);
+    const res = await createServer(values.name, values.imageUrl, user.email);
+    console.log(res);
   };
 
   if (!isMounted) {
@@ -81,28 +85,50 @@ function InitialModal() {
                 }}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Server Name :</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={isLoading}
-                      placeholder="Server name should be unique"
-                      {...field}
-                      className="bg-slate-100 text-black border-none outline-none"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            <div className="relative">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Server Name :</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isLoading}
+                        placeholder="Server name should be unique"
+                        {...field}
+                        className="bg-slate-100 text-black border-none outline-none"
+                        onChange={async (e) => {
+                          field.onChange(e);
+                          if (e.target.value) {
+                            const res = await isServerExist(
+                              e.target.value.trim()
+                            );
+                            if (res) {
+                              setIsServerUnique(!res.success);
+                            }
+                          } else {
+                            setIsServerUnique(true);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <div className="absolute right-0 top-[50%]">
+                <img
+                  src={`${isServerUnique ? "wrong.png" : "right.png"}`}
+                  className="size-8"
+                  alt=""
+                />
+              </div>
+            </div>
             <DialogFooter className="mt-8 bg-slate-300">
               <Button
                 variant="primary"
                 className="w-full text-lg sm:text-xl"
-                disabled={isLoading}
+                disabled={isLoading || isServerUnique}
               >
                 {isLoading && <Loader2 className="animate-spin size-8 mr-4" />}
                 Create
