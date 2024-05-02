@@ -23,12 +23,14 @@ import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
 import { createServer, isServerExist } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
+import { useRouter } from "next/navigation";
 
 function InitialModal() {
   const [isMounted, setIsMounted] = useState(false);
   const [imageInfo, setImageInfo] = useState({});
   const [isServerUnique, setIsServerUnique] = useState(true);
   const { user } = useUserContextProvider();
+  const router = useRouter();
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -43,9 +45,11 @@ function InitialModal() {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: { name: string; imageUrl: string }) => {
-    console.log(values);
     const res = await createServer(values.name, values.imageUrl, user.email);
     console.log(res);
+    if (res.success) {
+      router.push(`/servers/${res.data.isServerCreated._id}`);
+    }
   };
 
   if (!isMounted) {
