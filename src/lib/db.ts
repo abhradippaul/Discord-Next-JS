@@ -58,11 +58,20 @@ export async function createServer(
   }
 }
 
-export async function getUserInfo(userId:string) {
+export async function getUserInfo(userId: string) {
   try {
     const res = await fetch(`${db_url_user}/${userId}`);
     return await res.json();
   } catch (err: any) {
     console.log("Error white getting user info", err.message);
+  }
+}
+
+export async function getServerInfo(serverId: string) {
+  try {
+    const res = await fetch(db_url_server + "/" + serverId);
+    return await res.json();
+  } catch (err: any) {
+    console.log("Error while fetching server info", err.message);
   }
 }

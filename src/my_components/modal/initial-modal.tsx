@@ -17,7 +17,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
@@ -145,4 +145,4 @@ function InitialModal() {
   );
 }
 
-export default InitialModal;
+export default memo(InitialModal);

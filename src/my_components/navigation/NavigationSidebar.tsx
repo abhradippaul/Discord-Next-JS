@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import NavigationAction from "./NavigationAction";
 import { getUserInfo } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
@@ -21,7 +21,7 @@ export interface ServerProps {
 }
 
 function NavigationSidebar() {
-  const { user } = useUserContextProvider();
+  const { user, setUserServer } = useUserContextProvider();
   const [servers, setServers] = useState<ServerProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { serverId } = useParams();
@@ -29,10 +29,14 @@ function NavigationSidebar() {
     (async () => {
       if (user.email) {
         const res = await getUserInfo(user.email);
-        console.log(res);
         if (res.success) {
           setServers(res.data.Server);
           setIsLoading(false);
+          const arr = res.data.Server.map((e: any) => ({
+            role: e.role,
+            _id: e.ServerInfo._id,
+          }));
+          setUserServer(arr);
         }
       }
     })();
@@ -59,7 +63,7 @@ function NavigationSidebar() {
                 className={`absolute left-0 w-1 bg-white ${
                   serverId === e.ServerInfo._id
                     ? "top-0 bottom-0 rounded-md"
-                    : "top-[45%] bottom-[35%] rounded-full transition-[top,bottom] delay-100 group-hover:top-0 group-hover:rounded-md group-hover:bottom-0"
+                    : "top-[45%] bottom-[35%] rounded-full transition-[top,bottom] delay-100 group-hover:top-0 group-hover:bottom-0"
                 }`}
               ></div>
               <ActionTooltip
@@ -72,7 +76,7 @@ function NavigationSidebar() {
                     src={`${e.ServerInfo.imageUrl}`}
                     alt="image"
                     className={`rounded-full size-12 object-cover ${
-                      serverId !== e.ServerInfo._id && "hover:rounded-lg"
+                      serverId !== e.ServerInfo._id && "hover:rounded-md"
                     }`}
                   />
                 </Link>
@@ -97,4 +101,4 @@ function NavigationSidebar() {
   );
 }
 
-export default NavigationSidebar;
+export default memo(NavigationSidebar);

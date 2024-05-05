@@ -4,6 +4,7 @@ import { UploadDropzone } from "@/lib/uploadthing";
 
 import "@uploadthing/react/styles.css";
 import Image from "next/image";
+import { memo } from "react";
 
 interface PropValue {
   endpoint: "serverImage" | "messageFile";
@@ -33,4 +34,4 @@ function FileUpload({ endpoint, value, onChange }: PropValue) {
   );
 }
 
-export default FileUpload;
+export default memo(FileUpload);

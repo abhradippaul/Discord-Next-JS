@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import {
   ReactNode,
   createContext,
+  memo,
   useContext,
   useEffect,
   useState,
@@ -19,6 +20,13 @@ const CustomUserContext = createContext({
   },
   isDialogBoxOpen: false,
   setIsDialogBoxOpen: (prev: boolean) => {},
+  userServer: [
+    {
+      _id: "",
+      role: "",
+    },
+  ],
+  setUserServer: (prev: any) => {},
 });
 
 const UserContextProvider = CustomUserContext.Provider;
@@ -35,6 +43,7 @@ function UserContext({ children }: { children: ReactNode }) {
     status: "pending",
   });
   const [isDialogBoxOpen, setIsDialogBoxOpen] = useState(false);
+  const [userServer, setUserServer] = useState([]);
   const data = useSession();
   useEffect(() => {
     if (data.status !== "loading") {
@@ -47,10 +56,18 @@ function UserContext({ children }: { children: ReactNode }) {
     }
   }, [data]);
   return (
-    <UserContextProvider value={{ user, isDialogBoxOpen, setIsDialogBoxOpen }}>
+    <UserContextProvider
+      value={{
+        user,
+        isDialogBoxOpen,
+        setIsDialogBoxOpen,
+        userServer,
+        setUserServer,
+      }}
+    >
       {children}
     </UserContextProvider>
   );
 }
 
-export default UserContext;
+export default memo(UserContext);

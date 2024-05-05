@@ -17,13 +17,14 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
 import { createServer, isServerExist } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 function CreateServerModal() {
   const [isMounted, setIsMounted] = useState(false);
@@ -45,11 +46,15 @@ function CreateServerModal() {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: { name: string; imageUrl: string }) => {
-    const res = await createServer(values.name, values.imageUrl, user.email);
-    console.log(res);
-    if (res.success) {
-      router.push(`/servers/${res.data.isServerCreated._id}`);
-      window.location.reload();
+    if (values.imageUrl) {
+      const res = await createServer(values.name, values.imageUrl, user.email);
+      console.log(res);
+      if (res.success) {
+        router.push(`/servers/${res.data.isServerCreated._id}`);
+        window.location.reload();
+      }
+    } else {
+      toast.error("Image is not uploaded");
     }
   };
 
@@ -73,6 +78,7 @@ function CreateServerModal() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
+            <Toaster position="top-center" />
             <div className="my-4">
               <FormField
                 control={form.control}
@@ -126,7 +132,7 @@ function CreateServerModal() {
               />
               <div className="absolute right-0 top-[50%]">
                 <img
-                  src={`${isServerUnique ? "wrong.png" : "right.png"}`}
+                  src={`${isServerUnique ? "../wrong.png" : "../right.png"}`}
                   className="size-8"
                   alt=""
                 />
@@ -149,4 +155,4 @@ function CreateServerModal() {
   );
 }
 
-export default CreateServerModal;
+export default memo(CreateServerModal);
