@@ -1,4 +1,7 @@
 "use server";
+
+import axios from "axios";
+
 const db_url_user = process.env.DB_URL + "/api/v1/user";
 const db_url_server = process.env.DB_URL + "/api/v1/server";
 
@@ -73,5 +76,48 @@ export async function getServerInfo(serverId: string) {
     return await res.json();
   } catch (err: any) {
     console.log("Error while fetching server info", err.message);
+  }
+}
+
+export async function getInviteCode(serverId: string) {
+  try {
+    const { data } = await axios.get(db_url_server + "/invite/" + serverId);
+    return data;
+  } catch (err: any) {
+    console.log("Error while fetching invite code", err.message);
+  }
+}
+
+export async function checkIsTheUserAlreadyJoined(
+  serverId: string,
+  inviteCode: string,
+  userEmail: string
+) {
+  console.log(serverId,inviteCode,userEmail);
+  try {
+    const res = await axios.post(db_url_server + "/invite/" + serverId, {
+      data: {
+        inviteCode: inviteCode,
+        userEmail: userEmail,
+      },
+    });
+    console.log(res);
+    return res;
+  } catch (err: any) {
+    console.log("Error while verifying user invitation ", err.message);
+  }
+}
+
+export async function joinToTheServer(userId: string, serverId: string) {
+  try {
+    const { data } = await axios.get(db_url_server, {
+      data: {
+        userId: userId,
+        serverId: serverId,
+      },
+    });
+    return data;
+  } catch (err: any) {
+    console.log("Error while verifying user invitation ", err.message);
   }
 }

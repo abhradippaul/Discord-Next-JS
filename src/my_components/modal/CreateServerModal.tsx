@@ -32,6 +32,7 @@ function CreateServerModal() {
   const { user, isDialogBoxOpen, setIsDialogBoxOpen } =
     useUserContextProvider();
   const router = useRouter();
+  
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -64,8 +65,13 @@ function CreateServerModal() {
 
   return (
     <Dialog
-      open={isDialogBoxOpen}
-      onOpenChange={() => setIsDialogBoxOpen((prev: boolean) => !prev)}
+      open={isDialogBoxOpen.type === "Create Server" && isDialogBoxOpen.status}
+      onOpenChange={() =>
+        setIsDialogBoxOpen({
+          status: false,
+          type: "Create Server",
+        })
+      }
     >
       <DialogContent className="bg-white text-black">
         <DialogHeader className="px-6">

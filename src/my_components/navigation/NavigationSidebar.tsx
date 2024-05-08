@@ -57,7 +57,7 @@ function NavigationSidebar() {
           servers.map((e) => (
             <div
               key={e.ServerInfo._id}
-              className="w-full relative my-4 flex items-center justify-center group"
+              className="w-full relative z-50 my-4 flex items-center justify-center group"
             >
               <div
                 className={`absolute left-0 w-1 bg-white ${

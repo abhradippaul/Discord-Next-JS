@@ -3,7 +3,9 @@
 import { UserContextValueInterface } from "@/helper/customInterface";
 import { useSession } from "next-auth/react";
 import {
+  Dispatch,
   ReactNode,
+  SetStateAction,
   createContext,
   memo,
   useContext,
@@ -11,22 +13,48 @@ import {
   useState,
 } from "react";
 
-const CustomUserContext = createContext({
+interface UserServerValue {
+  _id: string;
+  role: string;
+}
+
+interface DialogBoxValue {
+  type: "Create Server" | "Invite People" | null;
+  status: boolean;
+}
+
+interface UserContextValue {
+  user: {
+    email: string;
+    image: string;
+    name: string;
+    status: string;
+  };
+  isDialogBoxOpen: DialogBoxValue;
+  setIsDialogBoxOpen: Dispatch<SetStateAction<DialogBoxValue>>;
+  userServer: UserServerValue[];
+  setUserServer: Dispatch<SetStateAction<UserServerValue[]>>;
+}
+
+const CustomUserContext = createContext<UserContextValue>({
   user: {
     email: "",
     status: "pending",
     name: "",
     image: "",
   },
-  isDialogBoxOpen: false,
-  setIsDialogBoxOpen: (prev: boolean) => {},
+  isDialogBoxOpen: {
+    type: null,
+    status: false,
+  },
+  setIsDialogBoxOpen: () => {},
   userServer: [
     {
       _id: "",
       role: "",
     },
   ],
-  setUserServer: (prev: any) => {},
+  setUserServer: () => {},
 });
 
 const UserContextProvider = CustomUserContext.Provider;
@@ -42,8 +70,11 @@ function UserContext({ children }: { children: ReactNode }) {
     name: "",
     status: "pending",
   });
-  const [isDialogBoxOpen, setIsDialogBoxOpen] = useState(false);
-  const [userServer, setUserServer] = useState([]);
+  const [isDialogBoxOpen, setIsDialogBoxOpen] = useState<DialogBoxValue>({
+    type: null,
+    status: false,
+  });
+  const [userServer, setUserServer] = useState<UserServerValue[]>([]);
   const data = useSession();
   useEffect(() => {
     if (data.status !== "loading") {
