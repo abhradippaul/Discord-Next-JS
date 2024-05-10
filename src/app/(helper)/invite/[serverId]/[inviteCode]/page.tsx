@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { checkIsTheUserAlreadyJoined, joinToTheServer } from "@/lib/db";
-import { useParams } from "next/navigation";
+import { checkIsTheUserAlreadyJoined } from "@/lib/db";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface ServerResponseValue {
@@ -24,8 +24,10 @@ function page() {
   const { serverId, inviteCode }: { serverId: string; inviteCode: string } =
     useParams();
   const [serverResponse, setServerResponse] = useState<ServerResponseValue>();
-  const [isMounter, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   const { user } = useUserContextProvider();
+  const router = useRouter();
   useEffect(() => {
     (async () => {
       if (serverId && inviteCode && user.email) {
@@ -34,39 +36,32 @@ function page() {
           inviteCode,
           user.email
         );
+        if (response?.message === "Already Joined") {
+          router.push("/servers/" + serverId);
+        }
         setServerResponse(response);
+        setIsLoading(false);
       }
     })();
     setIsMounted(true);
   }, [user]);
 
-  if (!isMounter) {
+  if (!isMounted) {
     return null;
   }
 
-  // if (!serverResponse?.success) {
-  //   return (
-  //     <Dialog open>
-  //       <DialogContent className="bg-white text-black">
-  //         <DialogHeader className="px-6">
-  //           <DialogTitle className="text-center my-4 text-xl sm:text-2xl">
-  //             Are you want to join ?
-  //           </DialogTitle>
-  //         </DialogHeader>
-  //       </DialogContent>
-  //     </Dialog>
-  //   );
-  // }
   return (
-    <Dialog open>
-      <DialogContent className="bg-white text-black">
-        <DialogHeader className="px-6">
-          <DialogTitle className="text-center my-4 text-xl sm:text-2xl">
-            Are you want to join ?
-          </DialogTitle>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+    !isLoading && (
+      <Dialog open={serverResponse?.message !== "Already Joined"}>
+        <DialogContent className="bg-white text-black">
+          <DialogHeader className="px-6">
+            <DialogTitle className="text-center my-4 text-xl sm:text-2xl">
+              Are you want to join ?
+            </DialogTitle>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    )
   );
 }
 

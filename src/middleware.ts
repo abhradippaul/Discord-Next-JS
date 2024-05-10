@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const isLoggedIn =
     request.cookies.get("next-auth.session-token")?.value || "";
   const isPublicPath = request.nextUrl.pathname === "/login";
+
   if (!isLoggedIn && !isPublicPath) {
-    console.log("is logged in", typeof isLoggedIn);
     return NextResponse.redirect(new URL("/login", request.url));
   }
   if (isLoggedIn && !isPublicPath) {
@@ -18,5 +18,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/servers/:path*", "/login"],
+  matcher: ["/servers/:path*", "/login","/"],
 };

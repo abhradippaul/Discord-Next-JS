@@ -5,6 +5,18 @@ import axios from "axios";
 const db_url_user = process.env.DB_URL + "/api/v1/user";
 const db_url_server = process.env.DB_URL + "/api/v1/server";
 
+export async function isTheUserExist(userEmail: string) {
+  try {
+    const { data } = await axios.get(`${db_url_user}/isExist/${userEmail}`);
+    return data;
+  } catch (err: any) {
+    return {
+      status: false,
+      message: err.message,
+    };
+  }
+}
+
 export async function createUser(
   email: string,
   name: string,
@@ -82,9 +94,10 @@ export async function getServerInfo(serverId: string) {
 export async function getInviteCode(serverId: string) {
   try {
     const { data } = await axios.get(db_url_server + "/invite/" + serverId);
+    console.log("Getting the invitation code");
     return data;
   } catch (err: any) {
-    console.log("Error while fetching invite code", err.message);
+    console.log("Error while fetching invite code", err.response.data.message);
   }
 }
 
@@ -93,31 +106,43 @@ export async function checkIsTheUserAlreadyJoined(
   inviteCode: string,
   userEmail: string
 ) {
-  console.log(serverId,inviteCode,userEmail);
   try {
-    const res = await axios.post(db_url_server + "/invite/" + serverId, {
-      data: {
+    const { data } = await axios.post(
+      db_url_server + "/invite/" + serverId,
+      {
         inviteCode: inviteCode,
         userEmail: userEmail,
       },
-    });
-    console.log(res);
-    return res;
+      { headers: { "Content-Type": "application/json" } }
+    );
+    return data;
   } catch (err: any) {
-    console.log("Error while verifying user invitation ", err.message);
+    console.log(
+      "Error while verifying user invitation ",
+      err.response.data.message
+    );
   }
 }
 
-export async function joinToTheServer(userId: string, serverId: string) {
+export async function createServerInviteCode(serverId: string) {
   try {
-    const { data } = await axios.get(db_url_server, {
-      data: {
-        userId: userId,
-        serverId: serverId,
-      },
-    });
+    const { data } = await axios.put(db_url_server + "/invite/" + serverId);
     return data;
   } catch (err: any) {
-    console.log("Error while verifying user invitation ", err.message);
+    return err?.response?.data?.message;
   }
 }
+
+// export async function joinToTheServer(userId: string, serverId: string) {
+//   try {
+//     const { data } = await axios.get(db_url_server, {
+//       data: {
+//         userId: userId,
+//         serverId: serverId,
+//       },
+//     });
+//     return data;
+//   } catch (err: any) {
+//     console.log("Error while verifying user invitation ", err.message);
+//   }
+// }

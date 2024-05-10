@@ -1,5 +1,6 @@
 "use client";
 
+import { useServerContext } from "@/components/providers/ServerInfoContext";
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +10,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { getInviteCode } from "@/lib/db";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
+import { createServerInviteCode } from "@/lib/db";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -19,21 +22,14 @@ function InviteModal() {
   const [isMounted, setIsMounted] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [inviteCode, setInviteCode] = useState<string>("");
   const { isDialogBoxOpen, setIsDialogBoxOpen } = useUserContextProvider();
   const { serverId }: { serverId: string } = useParams();
+  const { inviteLink, setInviteLink } = useServerContext();
   const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL;
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (serverId) {
-      (async () => {
-        setIsMounted(true);
-        const data = await getInviteCode(serverId);
-        setInviteCode(
-          `${NEXT_PUBLIC_URL}/servers/invite/${serverId}/${data.inviteCode}`
-        );
-      })();
-    }
+    setIsMounted(true);
   }, []);
 
   if (!isMounted) {
@@ -51,6 +47,7 @@ function InviteModal() {
       }}
     >
       <DialogContent className="bg-white text-black">
+        <Toaster />
         <DialogHeader className="px-6">
           <DialogTitle className="text-center my-4 text-xl sm:text-2xl">
             Invite Friends
@@ -64,7 +61,7 @@ function InviteModal() {
             <Input
               type="text"
               className="bg-zinc-300/50 border-0 text-black"
-              value={inviteCode}
+              value={`${NEXT_PUBLIC_URL}/invite/${serverId}/${inviteLink}`}
               readOnly
             />
             {isLinkCopied ? (
@@ -74,7 +71,9 @@ function InviteModal() {
                 className="size-4 ml-4 cursor-pointer"
                 onClick={() => {
                   setIsLinkCopied(true);
-                  navigator.clipboard.writeText(inviteCode);
+                  navigator.clipboard.writeText(
+                    `${NEXT_PUBLIC_URL}/invite/${serverId}/${inviteLink}`
+                  );
                   setTimeout(() => {
                     setIsLinkCopied(false);
                   }, 1000);
@@ -88,7 +87,24 @@ function InviteModal() {
             size="sm"
             className="text-black m-auto flex items-center justify-center"
             disabled={isLoading}
-            onClick={() => setIsLoading(true)}
+            onClick={async () => {
+              setIsLoading(true);
+              const response = await createServerInviteCode(serverId);
+              if (response?.success) {
+                setInviteLink(response.inviteCode);
+                toast({
+                  title: "Invite link generated successfully",
+                  duration: 2000,
+                });
+              } else {
+                toast({
+                  title: response,
+                  variant: "destructive",
+                  duration: 2000,
+                });
+              }
+              setIsLoading(false);
+            }}
           >
             {" "}
             Generate a new link{" "}

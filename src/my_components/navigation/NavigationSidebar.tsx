@@ -52,8 +52,7 @@ function NavigationSidebar() {
           <div className="w-full my-4 flex items-center justify-center">
             <Loader2 className="size-12 animate-spin" />
           </div>
-        ) : (
-          servers.length &&
+        ) : servers.length ? (
           servers.map((e) => (
             <div
               key={e.ServerInfo._id}
@@ -83,6 +82,8 @@ function NavigationSidebar() {
               </ActionTooltip>
             </div>
           ))
+        ) : (
+          <div></div>
         )}
       </ScrollArea>
       <ModeToggle />

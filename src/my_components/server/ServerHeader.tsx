@@ -19,12 +19,15 @@ import {
 import { useParams } from "next/navigation";
 import { memo, useEffect, useState } from "react";
 import InviteModal from "../modal/InviteModal";
+import { getInviteCode } from "@/lib/db";
+import { useServerContext } from "@/components/providers/ServerInfoContext";
 
 function ServerHeader() {
-  const { serverId } = useParams();
+  const { serverId }: { serverId: string } = useParams();
   const { userServer } = useUserContextProvider();
   const [serverRole, setServerRole] = useState("");
   const { setIsDialogBoxOpen } = useUserContextProvider();
+  const { setInviteLink } = useServerContext();
 
   useEffect(() => {
     if (serverId && userServer.length) {
@@ -45,7 +48,11 @@ function ServerHeader() {
       <DropdownMenuContent className="w-56 text-xs font-medium text-black dark:text-neutral-400">
         {serverRole !== "Guest" && (
           <DropdownMenuItem
-            onClick={() => {
+            onClick={async () => {
+              const data = await getInviteCode(serverId);
+              if (data?.success) {
+                setInviteLink(data.inviteCode);
+              }
               setIsDialogBoxOpen({
                 status: true,
                 type: "Invite People",
