@@ -82,10 +82,10 @@ export async function getUserInfo(userId: string) {
   }
 }
 
-export async function getServerInfo(serverId: string) {
+export async function getServerSidebarInfo(serverId: string) {
   try {
-    const res = await fetch(db_url_server + "/" + serverId);
-    return await res.json();
+    const { data } = await axios.get(db_url_server + "/sidebar/" + serverId);
+    return data;
   } catch (err: any) {
     console.log("Error while fetching server info", err.message);
   }
@@ -94,7 +94,6 @@ export async function getServerInfo(serverId: string) {
 export async function getInviteCode(serverId: string) {
   try {
     const { data } = await axios.get(db_url_server + "/invite/" + serverId);
-    console.log("Getting the invitation code");
     return data;
   } catch (err: any) {
     console.log("Error while fetching invite code", err.response.data.message);
@@ -133,16 +132,18 @@ export async function createServerInviteCode(serverId: string) {
   }
 }
 
-// export async function joinToTheServer(userId: string, serverId: string) {
-//   try {
-//     const { data } = await axios.get(db_url_server, {
-//       data: {
-//         userId: userId,
-//         serverId: serverId,
-//       },
-//     });
-//     return data;
-//   } catch (err: any) {
-//     console.log("Error while verifying user invitation ", err.message);
-//   }
-// }
+export async function joinToTheServer(userId: string, serverId: string) {
+  try {
+    const { data } = await axios.post(
+      db_url_server + "/invite",
+      {
+        userId: userId,
+        serverId: serverId,
+      },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    return data;
+  } catch (err: any) {
+    return err?.response?.data?.message;
+  }
+}

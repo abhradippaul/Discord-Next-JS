@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import NavigationAction from "./NavigationAction";
 import { getUserInfo } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
@@ -21,25 +21,29 @@ export interface ServerProps {
 }
 
 function NavigationSidebar() {
-  const { user, setUserServer } = useUserContextProvider();
+  const { user } = useUserContextProvider();
   const [servers, setServers] = useState<ServerProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { serverId } = useParams();
-  useEffect(() => {
-    (async () => {
-      if (user.email) {
-        const res = await getUserInfo(user.email);
-        if (res.success) {
-          setServers(res.data.Server);
-          setIsLoading(false);
-          const arr = res.data.Server.map((e: any) => ({
-            role: e.role,
-            _id: e.ServerInfo._id,
-          }));
-          setUserServer(arr);
-        }
+  const { setServerInfoPermission } = useUserContextProvider();
+
+  const getUserAndServerInfo = useCallback(async (userEmail: string) => {
+    if (userEmail) {
+      const res = await getUserInfo(userEmail);
+      if (res.success) {
+        setServers(res.data.Server);
+        setIsLoading(false);
+        const arr = res.data.Server.map((e: any) => ({
+          _id: e.ServerInfo._id,
+          role: e.role,
+        }));
+        setServerInfoPermission(arr);
       }
-    })();
+    }
+  }, []);
+
+  useEffect(() => {
+    getUserAndServerInfo(user.email);
   }, [user]);
 
   return (

@@ -17,7 +17,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
@@ -26,26 +26,20 @@ import { useUserContextProvider } from "@/components/providers/UserContext";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
-function CreateServerModal() {
+function EditServerModal() {
   const [isMounted, setIsMounted] = useState(false);
   const [isServerUnique, setIsServerUnique] = useState(true);
   const { user, isDialogBoxOpen, setIsDialogBoxOpen } =
     useUserContextProvider();
   const router = useRouter();
 
-  const formSchema = z.object({
-    name: z.string(),
-    imageUrl: z.string(),
-  });
-
   useEffect(() => {
     setIsMounted(true);
+    
   }, []);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm({
     defaultValues: {
       name: "",
       imageUrl: "",
@@ -54,24 +48,18 @@ function CreateServerModal() {
 
   const isLoading = form.formState.isSubmitting;
 
-  const onSubmit = useCallback(
-    async (values: { name: string; imageUrl: string }) => {
-      if (values.imageUrl) {
-        const res = await createServer(
-          values.name,
-          values.imageUrl,
-          user.email
-        );
-        if (res.success) {
-          router.push(`/servers/${res.data.isServerCreated._id}`);
-          window.location.reload();
-        }
-      } else {
-        toast.error("Image is not uploaded");
+  const onSubmit = async (values: { name: string; imageUrl: string }) => {
+    if (values.imageUrl) {
+      const res = await createServer(values.name, values.imageUrl, user.email);
+      console.log(res);
+      if (res.success) {
+        router.push(`/servers/${res.data.isServerCreated._id}`);
+        window.location.reload();
       }
-    },
-    [user]
-  );
+    } else {
+      toast.error("Image is not uploaded");
+    }
+  };
 
   if (!isMounted) {
     return null;
@@ -79,18 +67,18 @@ function CreateServerModal() {
 
   return (
     <Dialog
-      open={isDialogBoxOpen.type === "Create Server" && isDialogBoxOpen.status}
+      open={isDialogBoxOpen.type === "Edit Server" && isDialogBoxOpen.status}
       onOpenChange={() =>
         setIsDialogBoxOpen({
           status: false,
-          type: "Create Server",
+          type: "Edit Server",
         })
       }
     >
       <DialogContent className="bg-white text-black">
         <DialogHeader className="px-6">
           <DialogTitle className="text-center my-4 text-xl sm:text-2xl">
-            Customize your server
+            Edit your server
           </DialogTitle>
           <DialogDescription className="text-center my-4 font-semibold">
             Give your server a unique name and add an image
@@ -175,4 +163,4 @@ function CreateServerModal() {
   );
 }
 
-export default memo(CreateServerModal);
+export default memo(EditServerModal);

@@ -13,13 +13,13 @@ import {
   useState,
 } from "react";
 
-interface UserServerValue {
+interface ServerInfoPermission {
   _id: string;
   role: string;
 }
 
 interface DialogBoxValue {
-  type: "Create Server" | "Invite People" | null;
+  type: "Create Server" | "Invite People" | "Edit Server";
   status: boolean;
 }
 
@@ -32,8 +32,10 @@ interface UserContextValue {
   };
   isDialogBoxOpen: DialogBoxValue;
   setIsDialogBoxOpen: Dispatch<SetStateAction<DialogBoxValue>>;
-  userServer: UserServerValue[];
-  setUserServer: Dispatch<SetStateAction<UserServerValue[]>>;
+  serverInfoPermission: ServerInfoPermission[] | [];
+  setServerInfoPermission: Dispatch<
+    SetStateAction<ServerInfoPermission[] | []>
+  >;
 }
 
 const CustomUserContext = createContext<UserContextValue>({
@@ -44,17 +46,12 @@ const CustomUserContext = createContext<UserContextValue>({
     image: "",
   },
   isDialogBoxOpen: {
-    type: null,
+    type: "Create Server",
     status: false,
   },
   setIsDialogBoxOpen: () => {},
-  userServer: [
-    {
-      _id: "",
-      role: "",
-    },
-  ],
-  setUserServer: () => {},
+  serverInfoPermission: [],
+  setServerInfoPermission: () => {},
 });
 
 const UserContextProvider = CustomUserContext.Provider;
@@ -71,10 +68,13 @@ function UserContext({ children }: { children: ReactNode }) {
     status: "pending",
   });
   const [isDialogBoxOpen, setIsDialogBoxOpen] = useState<DialogBoxValue>({
-    type: null,
+    type: "Create Server",
     status: false,
   });
-  const [userServer, setUserServer] = useState<UserServerValue[]>([]);
+  const [serverInfoPermission, setServerInfoPermission] = useState<
+    ServerInfoPermission[] | []
+  >([]);
+
   const data = useSession();
   useEffect(() => {
     if (data.status !== "loading") {
@@ -92,8 +92,8 @@ function UserContext({ children }: { children: ReactNode }) {
         user,
         isDialogBoxOpen,
         setIsDialogBoxOpen,
-        userServer,
-        setUserServer,
+        serverInfoPermission,
+        setServerInfoPermission,
       }}
     >
       {children}
