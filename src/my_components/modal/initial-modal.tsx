@@ -17,17 +17,18 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
 import { createServer, isServerExist } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 function InitialModal() {
   const [isMounted, setIsMounted] = useState(false);
-  const [imageInfo, setImageInfo] = useState({});
   const [isServerUnique, setIsServerUnique] = useState(true);
   const { user } = useUserContextProvider();
   const router = useRouter();
@@ -35,7 +36,13 @@ function InitialModal() {
     setIsMounted(true);
   }, []);
 
-  const form = useForm({
+  const formSchema = z.object({
+    name: z.string(),
+    imageUrl: z.string(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       imageUrl: "",
@@ -44,13 +51,26 @@ function InitialModal() {
 
   const isLoading = form.formState.isSubmitting;
 
-  const onSubmit = async (values: { name: string; imageUrl: string }) => {
-    const res = await createServer(values.name, values.imageUrl, user.email);
-    console.log(res);
-    if (res.success) {
-      router.push(`/servers/${res.data.isServerCreated._id}`);
+  const onSubmit = useCallback(
+    async (values: { name: string; imageUrl: string }) => {
+      const res = await createServer(values.name, values.imageUrl, user.email);
+      if (res.success) {
+        router.push(`/servers/${res.data.isServerCreated._id}`);
+      }
+    },
+    [user]
+  );
+
+  const onChangeServerName = useCallback(async (e: string) => {
+    if (e) {
+      const res = await isServerExist(e.trim());
+      if (res) {
+        setIsServerUnique(!res.success);
+      }
+    } else {
+      setIsServerUnique(true);
     }
-  };
+  }, []);
 
   if (!isMounted) {
     return null;
@@ -102,18 +122,9 @@ function InitialModal() {
                         placeholder="Server name should be unique"
                         {...field}
                         className="bg-slate-100 text-black border-none outline-none"
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           field.onChange(e);
-                          if (e.target.value) {
-                            const res = await isServerExist(
-                              e.target.value.trim()
-                            );
-                            if (res) {
-                              setIsServerUnique(!res.success);
-                            }
-                          } else {
-                            setIsServerUnique(true);
-                          }
+                          onChangeServerName(e.target.value);
                         }}
                       />
                     </FormControl>

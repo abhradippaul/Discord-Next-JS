@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDebouncedCallback } from "use-debounce";
 
 function CreateServerModal() {
   const [isMounted, setIsMounted] = useState(false);
@@ -34,6 +35,16 @@ function CreateServerModal() {
   const { user, isDialogBoxOpen, setIsDialogBoxOpen } =
     useUserContextProvider();
   const router = useRouter();
+
+  const debounced = useCallback(
+    useDebouncedCallback(async ({ name, imageUrl, email }) => {
+      const res = await createServer(name, imageUrl, email);
+      if (res.success) {
+        router.push(`/servers/${res.data.isServerCreated._id}`);
+      }
+    }, 1000),
+    []
+  );
 
   const formSchema = z.object({
     name: z.string(),
@@ -56,16 +67,12 @@ function CreateServerModal() {
 
   const onSubmit = useCallback(
     async (values: { name: string; imageUrl: string }) => {
-      if (values.imageUrl) {
-        const res = await createServer(
-          values.name,
-          values.imageUrl,
-          user.email
-        );
-        if (res.success) {
-          router.push(`/servers/${res.data.isServerCreated._id}`);
-          window.location.reload();
-        }
+      if (values.imageUrl && values.name) {
+        debounced({
+          name: values.name,
+          imageUrl: values.imageUrl,
+          email: user.email,
+        });
       } else {
         toast.error("Image is not uploaded");
       }

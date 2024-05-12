@@ -19,7 +19,7 @@ interface ServerInfoPermission {
 }
 
 interface DialogBoxValue {
-  type: "Create Server" | "Invite People" | "Edit Server";
+  type: "Create Server" | "Invite People" | "Edit Server" | "Manage Member";
   status: boolean;
 }
 

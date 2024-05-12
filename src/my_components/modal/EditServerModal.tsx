@@ -17,29 +17,59 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
-import { createServer, isServerExist } from "@/lib/db";
+import { isServerExist, updateServerInfo } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { z } from "zod";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useServerContext } from "@/components/providers/ServerInfoContext";
+import { useDebouncedCallback } from "use-debounce";
 function EditServerModal() {
   const [isMounted, setIsMounted] = useState(false);
-  const [isServerUnique, setIsServerUnique] = useState(true);
+  const [isServerUnique, setIsServerUnique] = useState(false);
   const { user, isDialogBoxOpen, setIsDialogBoxOpen } =
     useUserContextProvider();
-  const router = useRouter();
+  const { serverShortInfo } = useServerContext();
+  const { serverId }: { serverId: string } = useParams();
+  const router = useRouter()
 
-  useEffect(() => {
+  const debounced = useCallback(
+    useDebouncedCallback(async (value: string) => {
+      const res = await isServerExist(value.trim());
+      if (res) {
+        setIsServerUnique(!res.success);
+      }
+    }, 1000),
+    []
+  );
+
+  const fromSchema = z.object({
+    name: z.string(),
+    imageUrl: z.string(),
+  });
+
+  const methodForUseEffect = useCallback((name: string, imageUrl: string) => {
+    if (name && imageUrl) {
+      form.setValue("name", name);
+      form.setValue("imageUrl", imageUrl);
+    }
     setIsMounted(true);
-    
   }, []);
 
-  const form = useForm({
+  useEffect(() => {
+    methodForUseEffect(
+      serverShortInfo?.name || "",
+      serverShortInfo?.imageUrl || ""
+    );
+  }, [serverShortInfo]);
+
+  const form = useForm<z.infer<typeof fromSchema>>({
+    resolver: zodResolver(fromSchema),
     defaultValues: {
       name: "",
       imageUrl: "",
@@ -48,18 +78,51 @@ function EditServerModal() {
 
   const isLoading = form.formState.isSubmitting;
 
-  const onSubmit = async (values: { name: string; imageUrl: string }) => {
-    if (values.imageUrl) {
-      const res = await createServer(values.name, values.imageUrl, user.email);
-      console.log(res);
-      if (res.success) {
-        router.push(`/servers/${res.data.isServerCreated._id}`);
-        window.location.reload();
+  const onSubmit = useCallback(
+    async (values: { name: string; imageUrl: string }) => {
+      if (values.imageUrl && values.name) {
+        let res;
+        if (values.name !== serverShortInfo?.name && values.name) {
+          res = await updateServerInfo(serverId, {
+            name: values.name,
+          });
+        } else if (
+          values.imageUrl !== serverShortInfo?.imageUrl &&
+          values.imageUrl
+        ) {
+          res = await updateServerInfo(serverId, {
+            imageUrl: values.imageUrl,
+          });
+        } else {
+          res = await updateServerInfo(serverId, {
+            imageUrl: values.imageUrl,
+            name: values.name,
+          });
+        }
+        if (res.success) {
+          router.refresh()
+        }
+      } else {
+        toast.error("Image is not uploaded");
       }
-    } else {
-      toast.error("Image is not uploaded");
-    }
-  };
+    },
+    [user]
+  );
+
+  const isServerNameUnique = useCallback(
+    async (e: string) => {
+      if (e) {
+        if (e !== serverShortInfo?.name) {
+          debounced(e);
+        } else {
+          setIsServerUnique(true);
+        }
+      } else {
+        setIsServerUnique(true);
+      }
+    },
+    [serverShortInfo]
+  );
 
   if (!isMounted) {
     return null;
@@ -122,16 +185,7 @@ function EditServerModal() {
                         className="bg-slate-100 text-black border-none outline-none"
                         onChange={async (e) => {
                           field.onChange(e);
-                          if (e.target.value) {
-                            const res = await isServerExist(
-                              e.target.value.trim()
-                            );
-                            if (res) {
-                              setIsServerUnique(!res.success);
-                            }
-                          } else {
-                            setIsServerUnique(true);
-                          }
+                          isServerNameUnique(e.target.value);
                         }}
                       />
                     </FormControl>
@@ -153,7 +207,7 @@ function EditServerModal() {
                 disabled={isLoading || isServerUnique}
               >
                 {isLoading && <Loader2 className="animate-spin size-8 mr-4" />}
-                Create
+                Save
               </Button>
             </DialogFooter>
           </form>

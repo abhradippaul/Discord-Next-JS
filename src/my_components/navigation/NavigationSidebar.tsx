@@ -1,15 +1,14 @@
 "use client";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import NavigationAction from "./NavigationAction";
 import { getUserInfo } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ActionTooltip from "@/components/Action-tooltip";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { ModeToggle } from "@/components/Mode-toggle";
 import CreateServerModal from "../modal/CreateServerModal";
+import EachServerElement from "./EachServerElement";
 
 export interface ServerProps {
   role: string;
@@ -24,7 +23,7 @@ function NavigationSidebar() {
   const { user } = useUserContextProvider();
   const [servers, setServers] = useState<ServerProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { serverId } = useParams();
+  const { serverId }: { serverId: string } = useParams();
   const { setServerInfoPermission } = useUserContextProvider();
 
   const getUserAndServerInfo = useCallback(async (userEmail: string) => {
@@ -58,33 +57,13 @@ function NavigationSidebar() {
           </div>
         ) : servers.length ? (
           servers.map((e) => (
-            <div
+            <EachServerElement
+              _id={e.ServerInfo._id}
+              serverId={serverId}
+              name={e.ServerInfo.name}
               key={e.ServerInfo._id}
-              className="w-full relative z-50 my-4 flex items-center justify-center group"
-            >
-              <div
-                className={`absolute left-0 w-1 bg-white ${
-                  serverId === e.ServerInfo._id
-                    ? "top-0 bottom-0 rounded-md"
-                    : "top-[45%] bottom-[35%] rounded-full transition-[top,bottom] delay-100 group-hover:top-0 group-hover:bottom-0"
-                }`}
-              ></div>
-              <ActionTooltip
-                label={e.ServerInfo.name}
-                align="center"
-                side="right"
-              >
-                <Link href={`/servers/${e.ServerInfo._id}`}>
-                  <img
-                    src={`${e.ServerInfo.imageUrl}`}
-                    alt="image"
-                    className={`rounded-full size-12 object-cover ${
-                      serverId !== e.ServerInfo._id && "hover:rounded-md"
-                    }`}
-                  />
-                </Link>
-              </ActionTooltip>
-            </div>
+              imageUrl={e.ServerInfo.imageUrl}
+            />
           ))
         ) : (
           <div></div>

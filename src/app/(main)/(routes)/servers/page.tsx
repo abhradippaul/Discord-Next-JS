@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect } from "react";
 
 function page() {
-  const { userServer } = useUserContextProvider();
+  const { serverInfoPermission } = useUserContextProvider();
   const router = useRouter();
 
   const routingToTheServer = useCallback((serverId: string) => {
@@ -13,9 +13,9 @@ function page() {
   }, []);
 
   useEffect(() => {
-    routingToTheServer(userServer[0]?._id);
+    routingToTheServer(serverInfoPermission[0]?._id);
     console.log("Checking from server page");
-  }, [userServer]);
+  }, [serverInfoPermission]);
 
   return (
     <div className="w-full min-h-dvh flex items-center justify-center"></div>

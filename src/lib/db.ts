@@ -1,6 +1,6 @@
 "use server";
 
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 
 const db_url_user = process.env.DB_URL + "/api/v1/user";
 const db_url_server = process.env.DB_URL + "/api/v1/server";
@@ -125,7 +125,7 @@ export async function checkIsTheUserAlreadyJoined(
 
 export async function createServerInviteCode(serverId: string) {
   try {
-    const { data } = await axios.put(db_url_server + "/invite/" + serverId);
+    const { data } = await axios.patch(db_url_server + "/invite/" + serverId);
     return data;
   } catch (err: any) {
     return err?.response?.data?.message;
@@ -141,6 +141,41 @@ export async function joinToTheServer(userId: string, serverId: string) {
         serverId: serverId,
       },
       { headers: { "Content-Type": "application/json" } }
+    );
+    return data;
+  } catch (err: any) {
+    return err?.response?.data?.message;
+  }
+}
+
+export async function updateServerInfo(
+  serverId: string,
+  updatedData: { name?: string; imageUrl?: string }
+) {
+  try {
+    const { data } = (await axios.patch(
+      db_url_server + "/" + serverId,
+      updatedData
+    )) as AxiosResponse;
+    return data;
+  } catch (err) {
+    const { message } = err as AxiosError;
+    return message;
+  }
+}
+
+export async function updateUserPermission(
+  serverId: string,
+  userId: string,
+  role: string
+) {
+  try {
+    const { data } = await axios.patch(
+      db_url_server + "/user-permission/" + serverId,
+      {
+        userId,
+        role,
+      }
     );
     return data;
   } catch (err: any) {

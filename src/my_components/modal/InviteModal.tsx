@@ -16,7 +16,7 @@ import { createServerInviteCode } from "@/lib/db";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import { useParams } from "next/navigation";
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 
 function InviteModal() {
   const [isMounted, setIsMounted] = useState(false);
@@ -32,6 +32,42 @@ function InviteModal() {
     setIsMounted(true);
   }, []);
 
+  const onOpenChange = useCallback(() => {
+    setIsDialogBoxOpen({
+      status: false,
+      type: "Invite People",
+    });
+  }, []);
+
+  const onClickCopyButton = useCallback(() => {
+    setIsLinkCopied(true);
+    navigator.clipboard.writeText(
+      `${NEXT_PUBLIC_URL}/invite/${serverId}/${inviteLink}`
+    );
+    setTimeout(() => {
+      setIsLinkCopied(false);
+    }, 1000);
+  }, [inviteLink]);
+
+  const onClickCreateInviteCode = useCallback(async () => {
+    setIsLoading(true);
+    const response = await createServerInviteCode(serverId);
+    if (response?.success) {
+      setInviteLink(response.inviteCode);
+      toast({
+        title: "Invite link generated successfully",
+        duration: 2000,
+      });
+    } else {
+      toast({
+        title: response,
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
+    setIsLoading(false);
+  }, []);
+
   if (!isMounted) {
     return null;
   }
@@ -39,12 +75,7 @@ function InviteModal() {
   return (
     <Dialog
       open={isDialogBoxOpen.type === "Invite People" && isDialogBoxOpen.status}
-      onOpenChange={() => {
-        setIsDialogBoxOpen({
-          status: false,
-          type: "Invite People",
-        });
-      }}
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="bg-white text-black">
         <Toaster />
@@ -69,15 +100,7 @@ function InviteModal() {
             ) : (
               <Copy
                 className="size-4 ml-4 cursor-pointer"
-                onClick={() => {
-                  setIsLinkCopied(true);
-                  navigator.clipboard.writeText(
-                    `${NEXT_PUBLIC_URL}/invite/${serverId}/${inviteLink}`
-                  );
-                  setTimeout(() => {
-                    setIsLinkCopied(false);
-                  }, 1000);
-                }}
+                onClick={onClickCopyButton}
               />
             )}
           </div>
@@ -87,24 +110,7 @@ function InviteModal() {
             size="sm"
             className="text-black m-auto flex items-center justify-center"
             disabled={isLoading}
-            onClick={async () => {
-              setIsLoading(true);
-              const response = await createServerInviteCode(serverId);
-              if (response?.success) {
-                setInviteLink(response.inviteCode);
-                toast({
-                  title: "Invite link generated successfully",
-                  duration: 2000,
-                });
-              } else {
-                toast({
-                  title: response,
-                  variant: "destructive",
-                  duration: 2000,
-                });
-              }
-              setIsLoading(false);
-            }}
+            onClick={onClickCreateInviteCode}
           >
             {" "}
             Generate a new link{" "}

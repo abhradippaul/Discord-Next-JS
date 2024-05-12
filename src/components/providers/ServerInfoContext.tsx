@@ -14,12 +14,23 @@ interface ServerShortInfoValue {
   name: string;
   imageUrl: string;
 }
+interface ServerMemberInfoValue {
+  _id: string;
+  role: string;
+  name: string;
+  imageUrl: string;
+  email: string;
+}
 
 interface ServerInfoContextValue {
   inviteLink: string;
   setInviteLink: Dispatch<SetStateAction<string>>;
   serverShortInfo: ServerShortInfoValue | null;
   setServerShortInfo: Dispatch<SetStateAction<ServerShortInfoValue | null>>;
+  serverMemberInfo: ServerMemberInfoValue[] | null;
+  setServerMemberInfo: Dispatch<SetStateAction<ServerMemberInfoValue[] | null>>;
+  serverMemberCount: string;
+  setServerMemberCount: Dispatch<SetStateAction<string>>;
 }
 
 const ServerContext = createContext<ServerInfoContextValue>({
@@ -27,6 +38,10 @@ const ServerContext = createContext<ServerInfoContextValue>({
   setInviteLink: () => {},
   serverShortInfo: null,
   setServerShortInfo: () => {},
+  serverMemberInfo: null,
+  setServerMemberInfo: () => {},
+  serverMemberCount: "",
+  setServerMemberCount: () => {},
 });
 
 const ServerContextProvider = ServerContext.Provider;
@@ -37,8 +52,16 @@ export function useServerContext() {
 
 function ServerInfoContext({ children }: { children: ReactNode }) {
   const [inviteLink, setInviteLink] = useState<string>("");
+
   const [serverShortInfo, setServerShortInfo] =
     useState<ServerShortInfoValue | null>(null);
+
+  const [serverMemberInfo, setServerMemberInfo] = useState<
+    ServerMemberInfoValue[] | null
+  >(null);
+
+  const [serverMemberCount, setServerMemberCount] = useState("");
+
   return (
     <ServerContextProvider
       value={{
@@ -46,6 +69,10 @@ function ServerInfoContext({ children }: { children: ReactNode }) {
         setInviteLink,
         serverShortInfo,
         setServerShortInfo,
+        serverMemberInfo,
+        setServerMemberInfo,
+        serverMemberCount,
+        setServerMemberCount,
       }}
     >
       {children}

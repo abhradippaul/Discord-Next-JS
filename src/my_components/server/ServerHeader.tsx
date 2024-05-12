@@ -1,4 +1,5 @@
 "use client";
+
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import { useParams } from "next/navigation";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { getInviteCode } from "@/lib/db";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
+import ManageMemberModal from "../modal/ManageMemberModal";
 // import InviteModal from "../modal/InviteModal";
 // import EditServerModal from "../modal/EditServerModal";
 const EditServerModal = React.lazy(() => import("../modal/EditServerModal"));
@@ -29,7 +31,7 @@ function ServerHeader() {
   const { serverId }: { serverId: string } = useParams();
   const [serverRole, setServerRole] = useState("");
   const { setIsDialogBoxOpen, serverInfoPermission } = useUserContextProvider();
-  const { setInviteLink, serverShortInfo } = useServerContext();
+  const { setInviteLink, serverShortInfo, inviteLink } = useServerContext();
 
   const methodForUseEffect = useCallback((userServer: any) => {
     if (serverId && userServer.length) {
@@ -60,10 +62,18 @@ function ServerHeader() {
     });
   }, []);
 
+  const onClickManageMember = useCallback(async () => {
+    setIsDialogBoxOpen({
+      status: true,
+      type: "Manage Member",
+    });
+  }, []);
+
   return (
     <DropdownMenu>
       {serverRole !== "Guest" && <InviteModal />}
       {serverRole === "Admin" && <EditServerModal />}
+      <ManageMemberModal />
       <DropdownMenuTrigger>
         <div className="w-full text-base font-semibold px-3 flex items-center justify-between h-12 border-neutral-200 dark:border-neutral-800 border-b-2 hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition">
           {serverShortInfo?.name}
@@ -88,7 +98,10 @@ function ServerHeader() {
           </DropdownMenuItem>
         )}
         {serverRole === "Admin" && (
-          <DropdownMenuItem className="px-3 flex items-center justify-between py-2 text-sm cursor-pointer">
+          <DropdownMenuItem
+            onClick={onClickManageMember}
+            className="px-3 flex items-center justify-between py-2 text-sm cursor-pointer"
+          >
             Manage Members <Users className="size-4" />
           </DropdownMenuItem>
         )}
