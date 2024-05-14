@@ -23,7 +23,7 @@ import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
 import { createServer, isServerExist } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,13 +35,12 @@ function CreateServerModal() {
   const { user, isDialogBoxOpen, setIsDialogBoxOpen } =
     useUserContextProvider();
   const router = useRouter();
+  const { serverId } = useParams();
 
   const debounced = useCallback(
-    useDebouncedCallback(async ({ name, imageUrl, email }) => {
-      const res = await createServer(name, imageUrl, email);
-      if (res.success) {
-        router.push(`/servers/${res.data.isServerCreated._id}`);
-      }
+    useDebouncedCallback(async (userName: string) => {
+      const res = await isServerExist(userName);
+      setIsServerUnique(!res?.success);
     }, 1000),
     []
   );
@@ -68,16 +67,38 @@ function CreateServerModal() {
   const onSubmit = useCallback(
     async (values: { name: string; imageUrl: string }) => {
       if (values.imageUrl && values.name) {
-        debounced({
-          name: values.name,
-          imageUrl: values.imageUrl,
-          email: user.email,
-        });
+        const res = await createServer(
+          values.name,
+          values.imageUrl,
+          user.email
+        );
+        if (res.success) {
+          router.push(`/servers/${res.data.isServerCreated._id}`);
+          router.refresh();
+          onOpenChange();
+        }
       } else {
         toast.error("Image is not uploaded");
       }
     },
     [user]
+  );
+
+  const checkServerNameUnique = useCallback((serverName: string) => {
+    if (serverName) {
+      debounced(serverName.trim());
+    } else {
+      setIsServerUnique(false);
+    }
+  }, []);
+
+  const onOpenChange = useCallback(
+    () =>
+      setIsDialogBoxOpen({
+        status: false,
+        type: "Create Server",
+      }),
+    []
   );
 
   if (!isMounted) {
@@ -87,12 +108,7 @@ function CreateServerModal() {
   return (
     <Dialog
       open={isDialogBoxOpen.type === "Create Server" && isDialogBoxOpen.status}
-      onOpenChange={() =>
-        setIsDialogBoxOpen({
-          status: false,
-          type: "Create Server",
-        })
-      }
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="bg-white text-black">
         <DialogHeader className="px-6">
@@ -139,25 +155,16 @@ function CreateServerModal() {
                         placeholder="Server name should be unique"
                         {...field}
                         className="bg-slate-100 text-black border-none outline-none"
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           field.onChange(e);
-                          if (e.target.value) {
-                            const res = await isServerExist(
-                              e.target.value.trim()
-                            );
-                            if (res) {
-                              setIsServerUnique(!res.success);
-                            }
-                          } else {
-                            setIsServerUnique(true);
-                          }
+                          checkServerNameUnique(e.target.value);
                         }}
                       />
                     </FormControl>
                   </FormItem>
                 )}
               />
-              <div className="absolute right-0 top-[50%]">
+              <div className="absolute right-2 top-[50%]">
                 <img
                   src={`${isServerUnique ? "../wrong.png" : "../right.png"}`}
                   className="size-8"

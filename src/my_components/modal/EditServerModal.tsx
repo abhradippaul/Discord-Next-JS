@@ -36,7 +36,7 @@ function EditServerModal() {
     useUserContextProvider();
   const { serverShortInfo } = useServerContext();
   const { serverId }: { serverId: string } = useParams();
-  const router = useRouter()
+  const router = useRouter();
 
   const debounced = useCallback(
     useDebouncedCallback(async (value: string) => {
@@ -78,29 +78,43 @@ function EditServerModal() {
 
   const isLoading = form.formState.isSubmitting;
 
+  const onOpenChange = useCallback(() => {
+    setIsDialogBoxOpen({
+      status: false,
+      type: "Edit Server",
+    });
+  }, []);
+
   const onSubmit = useCallback(
     async (values: { name: string; imageUrl: string }) => {
       if (values.imageUrl && values.name) {
-        let res;
-        if (values.name !== serverShortInfo?.name && values.name) {
-          res = await updateServerInfo(serverId, {
-            name: values.name,
-          });
-        } else if (
-          values.imageUrl !== serverShortInfo?.imageUrl &&
-          values.imageUrl
+        if (
+          values.name !== serverShortInfo?.name ||
+          values.imageUrl !== serverShortInfo?.imageUrl
         ) {
-          res = await updateServerInfo(serverId, {
-            imageUrl: values.imageUrl,
-          });
+          let res;
+          if (values.name !== serverShortInfo?.name) {
+            res = await updateServerInfo(serverId, {
+              name: values.name,
+            });
+          } else if (values.imageUrl !== serverShortInfo?.imageUrl) {
+            res = await updateServerInfo(serverId, {
+              imageUrl: values.imageUrl,
+            });
+          } else {
+            res = await updateServerInfo(serverId, {
+              imageUrl: values.imageUrl,
+              name: values.name,
+            });
+          }
+          if (res.success) {
+            router.refresh();
+          }
         } else {
-          res = await updateServerInfo(serverId, {
-            imageUrl: values.imageUrl,
-            name: values.name,
+          setIsDialogBoxOpen({
+            status: false,
+            type: "Edit Server",
           });
-        }
-        if (res.success) {
-          router.refresh()
         }
       } else {
         toast.error("Image is not uploaded");
@@ -131,12 +145,7 @@ function EditServerModal() {
   return (
     <Dialog
       open={isDialogBoxOpen.type === "Edit Server" && isDialogBoxOpen.status}
-      onOpenChange={() =>
-        setIsDialogBoxOpen({
-          status: false,
-          type: "Edit Server",
-        })
-      }
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="bg-white text-black">
         <DialogHeader className="px-6">
@@ -192,7 +201,7 @@ function EditServerModal() {
                   </FormItem>
                 )}
               />
-              <div className="absolute right-0 top-[50%]">
+              <div className="absolute right-1 top-[50%]">
                 <img
                   src={`${isServerUnique ? "../wrong.png" : "../right.png"}`}
                   className="size-8"

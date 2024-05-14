@@ -104,7 +104,8 @@ function page() {
               variant="primary"
               onClick={onBtnClick}
             >
-              {isLoading ? <Loader2 className="size-8 animate-spin" /> : "Join"}
+              {isLoadingBtn && <Loader2 className="size-6 mr-2 animate-spin" />}
+              Join
             </Button>
           </DialogFooter>
         </DialogContent>

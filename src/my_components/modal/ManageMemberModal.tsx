@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useState } from "react";
 import UserAvatar from "../UserAvatar";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
@@ -18,6 +18,7 @@ function ManageMemberModel() {
   const [isMounted, setIsMounted] = useState(false);
   const { isDialogBoxOpen, setIsDialogBoxOpen } = useUserContextProvider();
   const { serverMemberInfo, serverMemberCount } = useServerContext();
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
@@ -28,6 +29,7 @@ function ManageMemberModel() {
       status: false,
       type: "Manage Member",
     });
+    router.refresh();
   }, []);
 
   if (!isMounted) {

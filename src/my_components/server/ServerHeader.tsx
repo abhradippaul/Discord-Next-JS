@@ -23,6 +23,8 @@ import { getInviteCode } from "@/lib/db";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
 import ManageMemberModal from "../modal/ManageMemberModal";
 import CreateChannelModal from "../modal/CreateChannelModal";
+import LeaverServerModal from "../modal/LeaverServerModal";
+import DeleteServerModal from "../modal/DeleteServerModal";
 // import InviteModal from "../modal/InviteModal";
 // import EditServerModal from "../modal/EditServerModal";
 const EditServerModal = React.lazy(() => import("../modal/EditServerModal"));
@@ -32,7 +34,7 @@ function ServerHeader() {
   const { serverId }: { serverId: string } = useParams();
   const [serverRole, setServerRole] = useState("");
   const { setIsDialogBoxOpen, serverInfoPermission } = useUserContextProvider();
-  const { setInviteLink, serverShortInfo, inviteLink } = useServerContext();
+  const { setInviteLink, serverShortInfo } = useServerContext();
 
   const methodForUseEffect = useCallback((userServer: any) => {
     if (serverId && userServer.length) {
@@ -56,24 +58,38 @@ function ServerHeader() {
     });
   }, []);
 
-  const onClickServerSettings = useCallback(async () => {
+  const onClickServerSettings = useCallback(() => {
     setIsDialogBoxOpen({
       status: true,
       type: "Edit Server",
     });
   }, []);
 
-  const onClickManageMember = useCallback(async () => {
+  const onClickManageMember = useCallback(() => {
     setIsDialogBoxOpen({
       status: true,
       type: "Manage Member",
     });
   }, []);
 
-  const onClickCreateChannel = useCallback(async () => {
+  const onClickCreateChannel = useCallback(() => {
     setIsDialogBoxOpen({
       status: true,
       type: "Create Channel",
+    });
+  }, []);
+
+  const onClickLeaverServer = useCallback(() => {
+    setIsDialogBoxOpen({
+      status: true,
+      type: "Leave Server",
+    });
+  }, []);
+
+  const onClickDeleteServer = useCallback(() => {
+    setIsDialogBoxOpen({
+      status: true,
+      type: "Delete Server",
     });
   }, []);
 
@@ -83,6 +99,8 @@ function ServerHeader() {
       {serverRole === "Admin" && <EditServerModal />}
       <ManageMemberModal />
       <CreateChannelModal />
+      <LeaverServerModal />
+      <DeleteServerModal />
       <DropdownMenuTrigger>
         <div className="w-full text-base font-semibold px-3 flex items-center justify-between h-12 border-neutral-200 dark:border-neutral-800 border-b-2 hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition">
           {serverShortInfo?.name}
@@ -124,12 +142,18 @@ function ServerHeader() {
         )}
         {serverRole !== "Guest" && <DropdownMenuSeparator />}
         {serverRole === "Admin" && (
-          <DropdownMenuItem className="px-3 text-rose-500 py-2 flex items-center justify-between text-sm cursor-pointer">
+          <DropdownMenuItem
+            onClick={onClickDeleteServer}
+            className="px-3 text-rose-500 py-2 flex items-center justify-between text-sm cursor-pointer"
+          >
             Delete Server <Trash2 className="size-4" />
           </DropdownMenuItem>
         )}
         {serverRole !== "Admin" && (
-          <DropdownMenuItem className="px-3 py-2 text-rose-500 flex items-center justify-between text-sm cursor-pointer">
+          <DropdownMenuItem
+            onClick={onClickLeaverServer}
+            className="px-3 py-2 text-rose-500 flex items-center justify-between text-sm cursor-pointer"
+          >
             Leave Server <LogOut className="size-4" />
           </DropdownMenuItem>
         )}

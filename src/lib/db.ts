@@ -183,11 +183,13 @@ export async function updateUserPermission(
   }
 }
 
-export async function leaveFromTheServer(serverId: string, userId: string) {
+export async function leaveFromTheServer(serverId: string, userEmail: string) {
   try {
-    const { data } = await axios.delete(
-      db_url_server + "/leave/" + serverId + "/" + userId
-    );
+    const { data } = await axios.delete(db_url_server + "/leave/" + serverId, {
+      data: {
+        userEmail,
+      },
+    });
     return data;
   } catch (err: any) {
     return err?.response?.data?.message;
@@ -207,6 +209,15 @@ export async function createChannel(
         name,
       }
     );
+    return data;
+  } catch (err: any) {
+    return err?.response?.data?.message;
+  }
+}
+
+export async function deleteServer(serverId: string) {
+  try {
+    const { data } = await axios.delete(db_url_server + "/" + serverId);
     return data;
   } catch (err: any) {
     return err?.response?.data?.message;

@@ -24,7 +24,9 @@ interface DialogBoxValue {
     | "Invite People"
     | "Edit Server"
     | "Manage Member"
-    | "Create Channel";
+    | "Create Channel"
+    | "Leave Server"
+    | "Delete Server";
   status: boolean;
 }
 
