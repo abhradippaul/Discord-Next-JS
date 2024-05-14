@@ -22,6 +22,7 @@ import React, { memo, useCallback, useEffect, useState } from "react";
 import { getInviteCode } from "@/lib/db";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
 import ManageMemberModal from "../modal/ManageMemberModal";
+import CreateChannelModal from "../modal/CreateChannelModal";
 // import InviteModal from "../modal/InviteModal";
 // import EditServerModal from "../modal/EditServerModal";
 const EditServerModal = React.lazy(() => import("../modal/EditServerModal"));
@@ -69,11 +70,19 @@ function ServerHeader() {
     });
   }, []);
 
+  const onClickCreateChannel = useCallback(async () => {
+    setIsDialogBoxOpen({
+      status: true,
+      type: "Create Channel",
+    });
+  }, []);
+
   return (
     <DropdownMenu>
       {serverRole !== "Guest" && <InviteModal />}
       {serverRole === "Admin" && <EditServerModal />}
       <ManageMemberModal />
+      <CreateChannelModal />
       <DropdownMenuTrigger>
         <div className="w-full text-base font-semibold px-3 flex items-center justify-between h-12 border-neutral-200 dark:border-neutral-800 border-b-2 hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition">
           {serverShortInfo?.name}
@@ -106,7 +115,10 @@ function ServerHeader() {
           </DropdownMenuItem>
         )}
         {serverRole !== "Guest" && (
-          <DropdownMenuItem className="px-3 py-2 flex items-center justify-between text-sm cursor-pointer">
+          <DropdownMenuItem
+            onClick={onClickCreateChannel}
+            className="px-3 py-2 flex items-center justify-between text-sm cursor-pointer"
+          >
             Create Channel <PlusCircle className="size-4" />
           </DropdownMenuItem>
         )}

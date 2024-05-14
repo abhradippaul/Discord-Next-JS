@@ -17,7 +17,6 @@ import { useServerContext } from "@/components/providers/ServerInfoContext";
 function ManageMemberModel() {
   const [isMounted, setIsMounted] = useState(false);
   const { isDialogBoxOpen, setIsDialogBoxOpen } = useUserContextProvider();
-  const { serverId }: { serverId: string } = useParams();
   const { serverMemberInfo, serverMemberCount } = useServerContext();
 
   useEffect(() => {

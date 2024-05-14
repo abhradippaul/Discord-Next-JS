@@ -9,12 +9,13 @@ function page() {
   const router = useRouter();
 
   const routingToTheServer = useCallback((serverId: string) => {
-    router.push("/servers/" + serverId);
+    if (serverId) {
+      router.push("/servers/" + serverId);
+    }
   }, []);
 
   useEffect(() => {
     routingToTheServer(serverInfoPermission[0]?._id);
-    console.log("Checking from server page");
   }, [serverInfoPermission]);
 
   return (

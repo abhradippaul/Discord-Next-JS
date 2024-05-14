@@ -29,8 +29,8 @@ interface ServerInfoContextValue {
   setServerShortInfo: Dispatch<SetStateAction<ServerShortInfoValue | null>>;
   serverMemberInfo: ServerMemberInfoValue[] | null;
   setServerMemberInfo: Dispatch<SetStateAction<ServerMemberInfoValue[] | null>>;
-  serverMemberCount: string;
-  setServerMemberCount: Dispatch<SetStateAction<string>>;
+  serverMemberCount: number;
+  setServerMemberCount: Dispatch<SetStateAction<number>>;
 }
 
 const ServerContext = createContext<ServerInfoContextValue>({
@@ -40,7 +40,7 @@ const ServerContext = createContext<ServerInfoContextValue>({
   setServerShortInfo: () => {},
   serverMemberInfo: null,
   setServerMemberInfo: () => {},
-  serverMemberCount: "",
+  serverMemberCount: 0,
   setServerMemberCount: () => {},
 });
 
@@ -60,7 +60,7 @@ function ServerInfoContext({ children }: { children: ReactNode }) {
     ServerMemberInfoValue[] | null
   >(null);
 
-  const [serverMemberCount, setServerMemberCount] = useState("");
+  const [serverMemberCount, setServerMemberCount] = useState(0);
 
   return (
     <ServerContextProvider

@@ -182,3 +182,33 @@ export async function updateUserPermission(
     return err?.response?.data?.message;
   }
 }
+
+export async function leaveFromTheServer(serverId: string, userId: string) {
+  try {
+    const { data } = await axios.delete(
+      db_url_server + "/leave/" + serverId + "/" + userId
+    );
+    return data;
+  } catch (err: any) {
+    return err?.response?.data?.message;
+  }
+}
+
+export async function createChannel(
+  serverId: string,
+  name: string,
+  type: string
+) {
+  try {
+    const { data } = await axios.post(
+      db_url_server + "/" + serverId + "/channel",
+      {
+        type,
+        name,
+      }
+    );
+    return data;
+  } catch (err: any) {
+    return err?.response?.data?.message;
+  }
+}
