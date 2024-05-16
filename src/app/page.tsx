@@ -11,7 +11,6 @@ function page() {
       if (user.status !== "pending") {
         if (user.email) {
           const res = await isTheUserExist(user.email);
-          console.log(res);
           if (!res.success) {
             await createUser(user.email, user.name, user.image);
           }
