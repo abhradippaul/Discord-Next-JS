@@ -8,6 +8,9 @@ import ServerSearch from "./ServerSearch";
 import SidebarDivision from "./SidebarDivision";
 import SidebarInfo from "./SidebarInfo";
 import { Separator } from "@/components/ui/separator";
+import { Settings } from "lucide-react";
+import { useUserContextProvider } from "@/components/providers/UserContext";
+import ActionTooltip from "@/components/Action-tooltip";
 
 interface ChannelResponseValue {
   _id: "TEXT" | "AUDIO" | "VIDEO";
@@ -25,7 +28,9 @@ function ServerSidebar({ serverId }: { serverId: string }) {
     setServerMemberCount,
     serverMemberInfo,
     serverMemberCount,
+    serverRole,
   } = useServerContext();
+  const { setIsDialogBoxOpen } = useUserContextProvider();
   const [channelResponse, setChannelResponse] = useState<
     ChannelResponseValue[]
   >([]);
@@ -33,21 +38,11 @@ function ServerSidebar({ serverId }: { serverId: string }) {
   const methodForUseEffect = useCallback(async () => {
     const res = await getServerSidebarInfo(serverId);
     if (res.success) {
-      console.log(res);
       setServerShortInfo({
         imageUrl: res.data.imageUrl,
         name: res.data.name,
       });
-
-      const newArr = res.data.Server_Members.map((e: any) => ({
-        _id: e.UserInfo._id,
-        email: e.UserInfo.email,
-        name: e.UserInfo.name,
-        role: e.role,
-        imageUrl: e.UserInfo.imageUrl,
-      }));
-
-      setServerMemberInfo(newArr);
+      setServerMemberInfo(res.data.Server_Members);
       setServerMemberCount(res?.data?.Member_Count);
       setChannelResponse(res?.data?.Channel);
     }
@@ -57,34 +52,61 @@ function ServerSidebar({ serverId }: { serverId: string }) {
     methodForUseEffect();
   }, []);
 
+  const methodForOnClick = useCallback(() => {
+    setIsDialogBoxOpen({
+      status: true,
+      type: "Manage Member",
+    });
+  }, []);
+
   return (
     <div className="flex flex-col h-full text-primary w-full dark:bg-[#2B2D31] bg-[#F2F3F5]">
       <ServerHeader />
       <ScrollArea className="flex items-center w-full px-2 mt-2">
-        <h1 className="mb-4 text-xl font-semibold text-center">Channel</h1>
         <ServerSearch type="Channel" data={[]} />
-        {channelResponse.map((channel) => (
-          <SidebarDivision
-            key={channel._id}
-            Channel_Info={channel.Channel_Info}
-            _id={channel._id}
-            count={channel.count}
-          />
-        ))}
-        <Separator className="bg-white" />
-        <div className="my-4">
-          <h1 className="my-2 text-xl text-center font-semibold">
-            Member {serverMemberCount}
-          </h1>
-          {serverMemberInfo?.map((info) => (
-            <SidebarInfo
-              key={info._id}
-              _id={info._id}
-              name={info.name}
-              imageUrl={info.imageUrl}
-            />
-          ))}
-        </div>
+        {channelResponse.length ? (
+          <div>
+            <Separator className="bg-zinc-200 my-2 dark:bg-zinc-700 rounded-md" />
+            {channelResponse.map((channel) => (
+              <SidebarDivision
+                key={channel._id}
+                Channel_Info={channel.Channel_Info}
+                _id={channel._id}
+                count={channel.count}
+              />
+            ))}
+          </div>
+        ) : (
+          <div></div>
+        )}
+        {serverMemberInfo?.length ? (
+          <div className="my-4">
+            <Separator className="bg-zinc-200 dark:bg-zinc-700 rounded-md" />
+            <div className="text-xs flex items-center justify-between uppercase my-4 font-semibold text-zinc-500 dark:text-zinc-400">
+              Members
+              {serverRole === "Admin" && (
+                <ActionTooltip label="Manage Member" side="top">
+                  <div
+                    className="text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300 transition cursor-pointer"
+                    onClick={methodForOnClick}
+                  >
+                    <Settings className="size-4" />
+                  </div>
+                </ActionTooltip>
+              )}
+            </div>
+            {serverMemberInfo?.map((info) => (
+              <SidebarInfo
+                key={info._id}
+                _id={info._id}
+                name={info.name}
+                imageUrl={info.imageUrl}
+              />
+            ))}
+          </div>
+        ) : (
+          <div></div>
+        )}
       </ScrollArea>
     </div>
   );

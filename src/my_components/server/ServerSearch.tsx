@@ -8,6 +8,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useServerContext } from "@/components/providers/ServerInfoContext";
+import SidebarInfo from "./SidebarInfo";
 
 interface ServerSearchProps {
   type: "Channel";
@@ -21,6 +23,7 @@ interface ServerSearchProps {
 
 function ServerSearch({ data, type }: ServerSearchProps) {
   const [open, setOpen] = useState(false);
+  const { serverMemberInfo } = useServerContext();
   const methodForUseEffect = useCallback((e: KeyboardEvent) => {
     if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
@@ -56,7 +59,15 @@ function ServerSearch({ data, type }: ServerSearchProps) {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
-            <CommandItem></CommandItem>
+            {serverMemberInfo?.map((member) => (
+              <CommandItem className="my-2" key={member._id}>
+                <SidebarInfo
+                  _id={member._id}
+                  name={member.name}
+                  imageUrl={member.imageUrl}
+                />
+              </CommandItem>
+            ))}
           </CommandGroup>
         </CommandList>
       </CommandDialog>

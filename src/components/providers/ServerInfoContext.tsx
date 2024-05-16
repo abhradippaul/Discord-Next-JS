@@ -31,6 +31,8 @@ interface ServerInfoContextValue {
   setServerMemberInfo: Dispatch<SetStateAction<ServerMemberInfoValue[] | null>>;
   serverMemberCount: number;
   setServerMemberCount: Dispatch<SetStateAction<number>>;
+  serverRole: "Admin" | "Moderator" | "Guest";
+  setServerRole: Dispatch<SetStateAction<"Admin" | "Moderator" | "Guest">>;
 }
 
 const ServerContext = createContext<ServerInfoContextValue>({
@@ -42,6 +44,8 @@ const ServerContext = createContext<ServerInfoContextValue>({
   setServerMemberInfo: () => {},
   serverMemberCount: 0,
   setServerMemberCount: () => {},
+  serverRole: "Guest",
+  setServerRole: () => {},
 });
 
 const ServerContextProvider = ServerContext.Provider;
@@ -61,6 +65,9 @@ function ServerInfoContext({ children }: { children: ReactNode }) {
   >(null);
 
   const [serverMemberCount, setServerMemberCount] = useState(0);
+  const [serverRole, setServerRole] = useState<"Admin" | "Moderator" | "Guest">(
+    "Guest"
+  );
 
   return (
     <ServerContextProvider
@@ -73,6 +80,8 @@ function ServerInfoContext({ children }: { children: ReactNode }) {
         setServerMemberInfo,
         serverMemberCount,
         setServerMemberCount,
+        serverRole,
+        setServerRole,
       }}
     >
       {children}

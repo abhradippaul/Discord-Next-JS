@@ -32,14 +32,14 @@ const InviteModal = React.lazy(() => import("../modal/InviteModal"));
 
 function ServerHeader() {
   const { serverId }: { serverId: string } = useParams();
-  const [serverRole, setServerRole] = useState("");
   const { setIsDialogBoxOpen, serverInfoPermission } = useUserContextProvider();
-  const { setInviteLink, serverShortInfo } = useServerContext();
+  const { setInviteLink, serverShortInfo, setServerRole, serverRole } =
+    useServerContext();
 
   const methodForUseEffect = useCallback((userServer: any) => {
     if (serverId && userServer.length) {
       const role = userServer.find((e: any) => e._id === serverId);
-      setServerRole(role?.role || "");
+      setServerRole(role?.role);
     }
   }, []);
 
