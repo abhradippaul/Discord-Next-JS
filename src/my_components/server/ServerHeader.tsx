@@ -25,6 +25,7 @@ import ManageMemberModal from "../modal/ManageMemberModal";
 import CreateChannelModal from "../modal/CreateChannelModal";
 import LeaverServerModal from "../modal/LeaverServerModal";
 import DeleteServerModal from "../modal/DeleteServerModal";
+import { Skeleton } from "@/components/ui/skeleton";
 // import InviteModal from "../modal/InviteModal";
 // import EditServerModal from "../modal/EditServerModal";
 const EditServerModal = React.lazy(() => import("../modal/EditServerModal"));
@@ -33,7 +34,7 @@ const InviteModal = React.lazy(() => import("../modal/InviteModal"));
 function ServerHeader() {
   const { serverId }: { serverId: string } = useParams();
   const { setIsDialogBoxOpen, serverInfoPermission } = useUserContextProvider();
-  const { setInviteLink, serverShortInfo, setServerRole, serverRole } =
+  const { setInviteLink, serverShortInfo, setServerRole, serverRole, isLoading } =
     useServerContext();
 
   const methodForUseEffect = useCallback((userServer: any) => {
@@ -103,7 +104,11 @@ function ServerHeader() {
       <DeleteServerModal />
       <DropdownMenuTrigger>
         <div className="w-full text-base font-semibold px-3 flex items-center justify-between h-12 border-neutral-200 dark:border-neutral-800 border-b-2 hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition">
-          {serverShortInfo?.name}
+          {!isLoading ? (
+            serverShortInfo?.name
+          ) : (
+            <Skeleton className="flex-grow align-baseline h-6 mr-6" />
+          )}
           <ChevronDown />
         </div>
       </DropdownMenuTrigger>

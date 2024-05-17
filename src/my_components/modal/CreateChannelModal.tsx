@@ -31,11 +31,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useServerContext } from "@/components/providers/ServerInfoContext";
 
 function CreateServerModal() {
   const [isMounted, setIsMounted] = useState(false);
   const { isDialogBoxOpen, setIsDialogBoxOpen } = useUserContextProvider();
   const { serverId }: { serverId: string } = useParams();
+  const { setIsChanged } = useServerContext();
 
   enum ChannelTypes {
     TEXT = "TEXT",
@@ -50,7 +52,10 @@ function CreateServerModal() {
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    if (isDialogBoxOpen?.channelType) {
+      form.setValue("type", ChannelTypes[isDialogBoxOpen.channelType]);
+    }
+  }, [isDialogBoxOpen]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,15 +70,25 @@ function CreateServerModal() {
   const onSubmit = useCallback(
     async (values: { name: string; type: ChannelTypes }) => {
       const res = await createChannel(serverId, values.name, values.type);
-      if (res.success) {
+      if (res?.success) {
         setIsDialogBoxOpen({
           status: false,
           type: "Create Channel",
         });
+        form.reset();
+        setIsChanged((prev) => !prev);
       }
     },
     []
   );
+
+  const onOpenChange = useCallback(() => {
+    setIsDialogBoxOpen({
+      status: false,
+      type: "Create Channel",
+    });
+    form.reset();
+  }, []);
 
   if (!isMounted) {
     return null;
@@ -82,12 +97,7 @@ function CreateServerModal() {
   return (
     <Dialog
       open={isDialogBoxOpen.type === "Create Channel" && isDialogBoxOpen.status}
-      onOpenChange={() =>
-        setIsDialogBoxOpen({
-          status: false,
-          type: "Create Channel",
-        })
-      }
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="bg-white text-black">
         <DialogHeader className="px-6">
@@ -151,7 +161,7 @@ function CreateServerModal() {
                   isLoading || !Boolean(form?.getValues("name")?.length)
                 }
               >
-                {isLoading && <Loader2 className="animate-spin size-8 mr-4" />}
+                {isLoading && <Loader2 className="animate-spin size-4 mr-4" />}
                 Create
               </Button>
             </DialogFooter>

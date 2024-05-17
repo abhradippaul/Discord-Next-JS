@@ -25,7 +25,7 @@ import {
   ShieldQuestion,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { memo, useCallback, useState } from "react";
+import { Dispatch, SetStateAction, memo, useCallback, useState } from "react";
 
 interface PropsValue {
   name: string;
@@ -33,11 +33,19 @@ interface PropsValue {
   role: string;
   email: string;
   _id: string;
+  setCheck: Dispatch<SetStateAction<boolean>>;
 }
 
 const roleTypes = ["Guest", "Moderator"];
 
-function UserAvatar({ imageUrl, name, role, email, _id }: PropsValue) {
+function UserAvatar({
+  imageUrl,
+  name,
+  role,
+  email,
+  _id,
+  setCheck,
+}: PropsValue) {
   const { serverId }: { serverId: string } = useParams();
   const [onChangeMemberRole, setOnChangeMemberRole] = useState<string>(role);
   const [onKickMember, setOnKickMember] = useState<string>();
@@ -47,6 +55,7 @@ function UserAvatar({ imageUrl, name, role, email, _id }: PropsValue) {
     const res = await updateUserPermission(serverId, _id, role);
     if (res.success) {
       setOnChangeMemberRole(role);
+      setCheck(true);
     }
   }, []);
 
@@ -55,6 +64,7 @@ function UserAvatar({ imageUrl, name, role, email, _id }: PropsValue) {
     if (res.success) {
       setOnKickMember(_id);
       setServerMemberCount((prev) => prev - 1);
+      setCheck(true);
     }
   }, []);
 

@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import { ModeToggle } from "@/components/Mode-toggle";
 import CreateServerModal from "../modal/CreateServerModal";
 import EachServerElement from "./EachServerElement";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface ServerProps {
   role: string;
@@ -53,7 +54,7 @@ function NavigationSidebar() {
       <ScrollArea className="w-full h-full">
         {isLoading ? (
           <div className="w-full my-4 flex items-center justify-center">
-            <Loader2 className="size-12 animate-spin" />
+            <Skeleton className="size-12 rounded-full" />
           </div>
         ) : servers.length ? (
           servers.map((e) => (
@@ -72,7 +73,7 @@ function NavigationSidebar() {
       <ModeToggle />
       {isLoading ? (
         <div className="w-full mt-4 flex items-center justify-center">
-          <Loader2 className="size-12 animate-spin" />
+          <Skeleton className="size-12 rounded-full" />
         </div>
       ) : (
         <img

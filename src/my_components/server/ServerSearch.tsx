@@ -9,7 +9,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
-import SidebarInfo from "./SidebarInfo";
+import { useUserContextProvider } from "@/components/providers/UserContext";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 interface ServerSearchProps {
   type: "Channel";
@@ -24,6 +26,8 @@ interface ServerSearchProps {
 function ServerSearch({ data, type }: ServerSearchProps) {
   const [open, setOpen] = useState(false);
   const { serverMemberInfo } = useServerContext();
+  const { user } = useUserContextProvider();
+  const { serverId } = useParams();
   const methodForUseEffect = useCallback((e: KeyboardEvent) => {
     if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
@@ -42,7 +46,7 @@ function ServerSearch({ data, type }: ServerSearchProps) {
     <div>
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="group p-2 cursor-pointer border border-1 border-gray-700 rounded-md flex items-center justify-between gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition"
+        className="group p-2 cursor-pointer rounded-md flex items-center justify-between gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition"
       >
         <div className="flex items-center justify-center gap-x-2">
           <Search className="size-4 text-zinc-500 dark:text-zinc-300" />
@@ -59,15 +63,29 @@ function ServerSearch({ data, type }: ServerSearchProps) {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
-            {serverMemberInfo?.map((member) => (
-              <CommandItem className="my-2" key={member._id}>
-                <SidebarInfo
-                  _id={member._id}
-                  name={member.name}
-                  imageUrl={member.imageUrl}
-                />
-              </CommandItem>
-            ))}
+            {serverMemberInfo?.map(
+              (member) =>
+                member.email !== user.email && (
+                  <CommandItem
+                    className="group cursor-pointer  hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition"
+                    key={member._id}
+                  >
+                    <Link
+                      href={`/servers/${serverId}/${member._id}`}
+                      className="flex w-full h-full items-center"
+                    >
+                      <img
+                        src={member.imageUrl}
+                        className="size-8 mr-4 rounded-full"
+                        alt="image"
+                      />
+                      <p className="font-semibold text-sm text-zinc-500 group-hover:text-zinc-600 dark:text-zinc-400 dark:group-hover:text-zinc-300 transition">
+                        {member.name}
+                      </p>
+                    </Link>
+                  </CommandItem>
+                )
+            )}
           </CommandGroup>
         </CommandList>
       </CommandDialog>

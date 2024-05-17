@@ -17,8 +17,9 @@ import { useServerContext } from "@/components/providers/ServerInfoContext";
 function ManageMemberModel() {
   const [isMounted, setIsMounted] = useState(false);
   const { isDialogBoxOpen, setIsDialogBoxOpen } = useUserContextProvider();
-  const { serverMemberInfo, serverMemberCount } = useServerContext();
-  const router = useRouter();
+  const { serverMemberInfo, serverMemberCount, setIsChanged } =
+    useServerContext();
+  const [check, setCheck] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -29,7 +30,7 @@ function ManageMemberModel() {
       status: false,
       type: "Manage Member",
     });
-    router.refresh();
+    setIsChanged(check);
   }, []);
 
   if (!isMounted) {
@@ -59,6 +60,7 @@ function ManageMemberModel() {
               name={data.name}
               role={data.role}
               email={data.email}
+              setCheck={setCheck}
             />
           ))}
         </ScrollArea>

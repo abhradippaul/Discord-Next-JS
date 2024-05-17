@@ -223,3 +223,14 @@ export async function deleteServer(serverId: string) {
     return err?.response?.data?.message;
   }
 }
+
+export async function deleteChannel(channelId: string, serverId: string) {
+  try {
+    const { data } = await axios.delete(
+      db_url_server + "/" + serverId + "/channel/" + channelId
+    );
+    return data;
+  } catch (err: any) {
+    return err?.response?.data?.message;
+  }
+}

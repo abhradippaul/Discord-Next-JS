@@ -23,7 +23,7 @@ import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
 import { isServerExist, updateServerInfo } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,9 +34,8 @@ function EditServerModal() {
   const [isServerUnique, setIsServerUnique] = useState(false);
   const { user, isDialogBoxOpen, setIsDialogBoxOpen } =
     useUserContextProvider();
-  const { serverShortInfo } = useServerContext();
+  const { serverShortInfo, setIsChanged } = useServerContext();
   const { serverId }: { serverId: string } = useParams();
-  const router = useRouter();
 
   const debounced = useCallback(
     useDebouncedCallback(async (value: string) => {
@@ -108,13 +107,12 @@ function EditServerModal() {
             });
           }
           if (res.success) {
-            router.refresh();
+            setIsChanged((prev) => !prev);
+            setIsDialogBoxOpen({
+              status: false,
+              type: "Edit Server",
+            });
           }
-        } else {
-          setIsDialogBoxOpen({
-            status: false,
-            type: "Edit Server",
-          });
         }
       } else {
         toast.error("Image is not uploaded");
@@ -215,7 +213,7 @@ function EditServerModal() {
                 className="w-full text-lg sm:text-xl"
                 disabled={isLoading || isServerUnique}
               >
-                {isLoading && <Loader2 className="animate-spin size-8 mr-4" />}
+                {isLoading && <Loader2 className="animate-spin size-4 mr-4" />}
                 Save
               </Button>
             </DialogFooter>

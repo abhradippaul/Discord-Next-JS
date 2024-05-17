@@ -28,6 +28,7 @@ interface DialogBoxValue {
     | "Leave Server"
     | "Delete Server";
   status: boolean;
+  channelType? : "TEXT" | "AUDIO" | "VIDEO"
 }
 
 interface UserContextValue {

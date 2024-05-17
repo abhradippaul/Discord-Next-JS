@@ -21,6 +21,7 @@ function SidebarDivision({ _id, count, Channel_Info }: ChannelResponseValue) {
     setIsDialogBoxOpen({
       status: true,
       type: "Create Channel",
+      channelType: _id,
     });
   }, []);
 

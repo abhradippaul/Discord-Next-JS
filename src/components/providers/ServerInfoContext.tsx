@@ -33,6 +33,10 @@ interface ServerInfoContextValue {
   setServerMemberCount: Dispatch<SetStateAction<number>>;
   serverRole: "Admin" | "Moderator" | "Guest";
   setServerRole: Dispatch<SetStateAction<"Admin" | "Moderator" | "Guest">>;
+  isChanged: boolean;
+  setIsChanged: Dispatch<SetStateAction<boolean>>;
+  isLoading: boolean;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 const ServerContext = createContext<ServerInfoContextValue>({
@@ -46,6 +50,10 @@ const ServerContext = createContext<ServerInfoContextValue>({
   setServerMemberCount: () => {},
   serverRole: "Guest",
   setServerRole: () => {},
+  isChanged: false,
+  setIsChanged: () => {},
+  isLoading: false,
+  setIsLoading: () => {},
 });
 
 const ServerContextProvider = ServerContext.Provider;
@@ -68,6 +76,8 @@ function ServerInfoContext({ children }: { children: ReactNode }) {
   const [serverRole, setServerRole] = useState<"Admin" | "Moderator" | "Guest">(
     "Guest"
   );
+  const [isChanged, setIsChanged] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   return (
     <ServerContextProvider
@@ -82,6 +92,10 @@ function ServerInfoContext({ children }: { children: ReactNode }) {
         setServerMemberCount,
         serverRole,
         setServerRole,
+        isChanged,
+        setIsChanged,
+        isLoading,
+        setIsLoading,
       }}
     >
       {children}
