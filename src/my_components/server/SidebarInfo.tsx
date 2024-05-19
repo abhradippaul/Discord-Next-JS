@@ -1,7 +1,6 @@
 import ActionTooltip from "@/components/Action-tooltip";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
 import { useUserContextProvider } from "@/components/providers/UserContext";
-import { deleteChannel } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import { Edit, Lock, Mic, Trash, Video } from "lucide-react";
 import Link from "next/link";
@@ -23,20 +22,33 @@ function SidebarInfo({ _id, name, imageUrl, type, email }: SidebarInfoProps) {
     memberId,
   }: { serverId: string; channelId: string; memberId: string } = useParams();
   const { setIsDialogBoxOpen } = useUserContextProvider();
-  const { serverRole, setIsChanged } = useServerContext();
+  const { serverRole, setServerChannelInfo } = useServerContext();
 
   const onEditClick = useCallback(() => {
-    // setIsDialogBoxOpen({
-    //   status: true,
-    //   type: "edi",
-    // })
+    if (_id && name && type) {
+      setIsDialogBoxOpen({
+        status: true,
+        type: "Edit Channel",
+      });
+      setServerChannelInfo({
+        _id: _id,
+        name: name,
+        type: type,
+      });
+    }
   }, []);
 
   const onDeleteClick = useCallback(async () => {
-    const res = await deleteChannel(_id, serverId);
-    console.log(res);
-    if (res.success) {
-      setIsChanged((prev) => !prev);
+    if (_id && name && type) {
+      setIsDialogBoxOpen({
+        status: true,
+        type: "Delete Channel",
+      });
+      setServerChannelInfo({
+        _id: _id,
+        name: name,
+        type: type,
+      });
     }
   }, []);
 

@@ -22,6 +22,12 @@ interface ServerMemberInfoValue {
   email: string;
 }
 
+interface ServerChannelInfoValue {
+  _id: string;
+  name: string;
+  type: "TEXT" | "AUDIO" | "VIDEO";
+}
+
 interface ServerInfoContextValue {
   inviteLink: string;
   setInviteLink: Dispatch<SetStateAction<string>>;
@@ -37,6 +43,8 @@ interface ServerInfoContextValue {
   setIsChanged: Dispatch<SetStateAction<boolean>>;
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
+  serverChannelInfo: ServerChannelInfoValue | null;
+  setServerChannelInfo: Dispatch<SetStateAction<ServerChannelInfoValue | null>>;
 }
 
 const ServerContext = createContext<ServerInfoContextValue>({
@@ -54,6 +62,8 @@ const ServerContext = createContext<ServerInfoContextValue>({
   setIsChanged: () => {},
   isLoading: false,
   setIsLoading: () => {},
+  serverChannelInfo: null,
+  setServerChannelInfo: () => {},
 });
 
 const ServerContextProvider = ServerContext.Provider;
@@ -76,6 +86,8 @@ function ServerInfoContext({ children }: { children: ReactNode }) {
   const [serverRole, setServerRole] = useState<"Admin" | "Moderator" | "Guest">(
     "Guest"
   );
+  const [serverChannelInfo, setServerChannelInfo] =
+    useState<ServerChannelInfoValue | null>(null);
   const [isChanged, setIsChanged] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -96,6 +108,8 @@ function ServerInfoContext({ children }: { children: ReactNode }) {
         setIsChanged,
         isLoading,
         setIsLoading,
+        serverChannelInfo,
+        setServerChannelInfo,
       }}
     >
       {children}

@@ -11,7 +11,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { deleteServer, leaveFromTheServer } from "@/lib/db";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useState } from "react";
@@ -38,6 +37,7 @@ function DeleteServerModal() {
   const onConfirmClick = useCallback(async () => {
     if (serverId) {
       setIsLoading(true);
+      const deleteServer = (await import("@/lib/db")).deleteServer;
       const res = await deleteServer(serverId);
       if (res.success) {
         onOpenChange();

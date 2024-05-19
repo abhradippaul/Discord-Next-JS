@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import {
   DropdownMenu,
@@ -18,24 +19,49 @@ import {
   Users,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import React, { memo, useCallback, useEffect, useState } from "react";
-import { getInviteCode } from "@/lib/db";
+import React, { memo, useCallback, useEffect } from "react";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
-import ManageMemberModal from "../modal/ManageMemberModal";
-import CreateChannelModal from "../modal/CreateChannelModal";
-import LeaverServerModal from "../modal/LeaverServerModal";
-import DeleteServerModal from "../modal/DeleteServerModal";
 import { Skeleton } from "@/components/ui/skeleton";
-// import InviteModal from "../modal/InviteModal";
-// import EditServerModal from "../modal/EditServerModal";
-const EditServerModal = React.lazy(() => import("../modal/EditServerModal"));
-const InviteModal = React.lazy(() => import("../modal/InviteModal"));
+
+const EditChannelModel = dynamic(() => import("../modal/EditChannelModel"), {
+  ssr: false,
+});
+const DeleteChannelModel = dynamic(
+  () => import("../modal/DeleteChannelModel"),
+  {
+    ssr: false,
+  }
+);
+const InviteModal = dynamic(() => import("../modal/InviteModal"), {
+  ssr: false,
+});
+const EditServerModal = dynamic(() => import("../modal/EditServerModal"), {
+  ssr: false,
+});
+const ManageMemberModal = dynamic(() => import("../modal/ManageMemberModal"), {
+  ssr: false,
+});
+const CreateChannelModal = dynamic(
+  () => import("../modal/CreateChannelModal"),
+  { ssr: false }
+);
+const LeaverServerModal = dynamic(() => import("../modal/LeaverServerModal"), {
+  ssr: false,
+});
+const DeleteServerModal = dynamic(() => import("../modal/DeleteServerModal"), {
+  ssr: false,
+});
 
 function ServerHeader() {
   const { serverId }: { serverId: string } = useParams();
   const { setIsDialogBoxOpen, serverInfoPermission } = useUserContextProvider();
-  const { setInviteLink, serverShortInfo, setServerRole, serverRole, isLoading } =
-    useServerContext();
+  const {
+    setInviteLink,
+    serverShortInfo,
+    setServerRole,
+    serverRole,
+    isLoading,
+  } = useServerContext();
 
   const methodForUseEffect = useCallback((userServer: any) => {
     if (serverId && userServer.length) {
@@ -49,6 +75,7 @@ function ServerHeader() {
   }, [serverInfoPermission]);
 
   const onClickInvitePeople = useCallback(async () => {
+    const getInviteCode = (await import("@/lib/db")).getInviteCode;
     const data = await getInviteCode(serverId);
     if (data?.success) {
       setInviteLink(data.inviteCode);
@@ -96,12 +123,24 @@ function ServerHeader() {
 
   return (
     <DropdownMenu>
-      {serverRole !== "Guest" && <InviteModal />}
-      {serverRole === "Admin" && <EditServerModal />}
-      <ManageMemberModal />
-      <CreateChannelModal />
-      <LeaverServerModal />
-      <DeleteServerModal />
+      {serverRole !== "Guest" && (
+        <div>
+          <InviteModal />
+          <CreateChannelModal />
+        </div>
+      )}
+      {serverRole === "Admin" ? (
+        <div>
+          <EditServerModal />
+          <DeleteServerModal />
+          <ManageMemberModal />
+          <DeleteChannelModel />
+          <EditChannelModel />
+        </div>
+      ) : (
+        <LeaverServerModal />
+      )}
+
       <DropdownMenuTrigger>
         <div className="w-full text-base font-semibold px-3 flex items-center justify-between h-12 border-neutral-200 dark:border-neutral-800 border-b-2 hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition">
           {!isLoading ? (

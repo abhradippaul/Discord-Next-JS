@@ -2,7 +2,6 @@
 
 import { memo, useCallback, useEffect, useState } from "react";
 import ServerHeader from "./ServerHeader";
-import { getServerSidebarInfo } from "@/lib/db";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ServerSearch from "./ServerSearch";
@@ -41,6 +40,8 @@ function ServerSidebar({ serverId }: { serverId: string }) {
   >([]);
 
   const methodForUseEffect = useCallback(async () => {
+    const getServerSidebarInfo = (await import("@/lib/db"))
+      .getServerSidebarInfo;
     const res = await getServerSidebarInfo(serverId);
     if (res.success) {
       setServerShortInfo({
@@ -71,16 +72,31 @@ function ServerSidebar({ serverId }: { serverId: string }) {
       <ScrollArea className="flex items-center w-full px-2 mt-2">
         <ServerSearch type="Channel" data={[]} />
         {isLoading ? (
-          <div className="flex w-full flex-grow flex-col">
-            <Skeleton className="h-8 rounded-md m-2" />
-            <Skeleton className="h-6 rounded-md mx-6 my-1" />
-            <Skeleton className="h-4 rounded-md mx-6 my-1" />
-            <Skeleton className="h-8 rounded-md m-2" />
-            <Skeleton className="h-6 rounded-md mx-6 my-1" />
-            <Skeleton className="h-6 rounded-md mx-6 my-1" />
-            <Skeleton className="h-8 rounded-md m-2" />
-            <Skeleton className="h-6 rounded-md mx-6 my-1" />
-            <Skeleton className="h-6 rounded-md mx-6 my-1" />
+          <div>
+            <Separator className="bg-zinc-200 dark:bg-zinc-700 rounded-md" />
+            <div className="w-full my-2 flex flex-col">
+              <div className="text-xs flex uppercase my-2 px-2 font-semibold text-zinc-500 dark:text-zinc-400 flex-col">
+                TEXT CHANNELS
+                <div className="w-full flex flex-col">
+                  <Skeleton className="h-4 w-full rounded-md m-1" />
+                  <Skeleton className="h-4 w-full rounded-md m-1" />
+                </div>
+              </div>
+              <div className="text-xs flex uppercase my-2 font-semibold text-zinc-500 dark:text-zinc-400 flex-col">
+                AUDIO CHANNELS
+                <div className="w-full flex flex-col">
+                  <Skeleton className="h-4 w-full rounded-md m-1" />
+                  <Skeleton className="h-4 w-full rounded-md m-1" />
+                </div>
+              </div>
+              <div className="text-xs flex uppercase my-2 font-semibold text-zinc-500 dark:text-zinc-400 flex-col">
+                VOICE CHANNELS
+                <div className="w-full flex flex-col">
+                  <Skeleton className="h-4 w-full rounded-md m-1" />
+                  <Skeleton className="h-4 w-full rounded-md m-1" />
+                </div>
+              </div>
+            </div>
           </div>
         ) : channelResponse.length ? (
           <div>
@@ -97,7 +113,15 @@ function ServerSidebar({ serverId }: { serverId: string }) {
         ) : (
           <div></div>
         )}
-        {serverMemberCount ? (
+        {isLoading ? (
+          <div className="my-4 flex flex-col">
+            <Separator className="bg-zinc-200 dark:bg-zinc-700 rounded-md" />
+            <div className="uppercase text-xs mt-4 text-zinc-500 font-semibold">
+              members
+            </div>
+            <Skeleton className="h-8 w-full rounded-md m-2" />
+          </div>
+        ) : serverMemberCount ? (
           <div className="my-4">
             <Separator className="bg-zinc-200 dark:bg-zinc-700 rounded-md" />
             <div className="text-xs flex items-center justify-between uppercase my-4 font-semibold text-zinc-500 dark:text-zinc-400">

@@ -16,7 +16,7 @@ function NavigationAction() {
           })
         }
       >
-        <div className="flex items-center justify-center size-[48px] rounded-[24px] dark:bg-neutral-700 group-hover:rounded-[12px] group-hover:bg-emerald-600 transition-colors">
+        <div className="flex items-center justify-center size-[48px] rounded-[24px] dark:bg-neutral-700 bg-white  group-hover:rounded-[12px] group-hover:bg-emerald-600 transition-colors">
           <Plus className="text-emerald-600 transition-colors group-hover:text-white" />
         </div>
       </div>

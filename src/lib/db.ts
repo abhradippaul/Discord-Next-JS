@@ -234,3 +234,19 @@ export async function deleteChannel(channelId: string, serverId: string) {
     return err?.response?.data?.message;
   }
 }
+
+export async function updateChannel(
+  channelId: string,
+  serverId: string,
+  updatedValue: { name?: string; type?: string }
+) {
+  try {
+    const { data } = await axios.patch(
+      db_url_server + "/" + serverId + "/channel/" + channelId,
+      updatedValue
+    );
+    return data;
+  } catch (err: any) {
+    return err?.response?.data?.message;
+  }
+}

@@ -13,7 +13,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { leaveFromTheServer, updateUserPermission } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import {
   Check,
@@ -52,6 +51,8 @@ function UserAvatar({
   const { setServerMemberCount } = useServerContext();
 
   const onRoleChange = useCallback(async (role: string) => {
+    const updateUserPermission = (await import("@/lib/db"))
+      .updateUserPermission;
     const res = await updateUserPermission(serverId, _id, role);
     if (res.success) {
       setOnChangeMemberRole(role);
@@ -60,6 +61,7 @@ function UserAvatar({
   }, []);
 
   const onKickFromTheServer = useCallback(async () => {
+    const leaveFromTheServer = (await import("@/lib/db")).leaveFromTheServer;
     const res = await leaveFromTheServer(serverId, _id);
     if (res.success) {
       setOnKickMember(_id);

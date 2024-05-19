@@ -12,17 +12,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { memo, useCallback, useEffect, useState } from "react";
 
-function LeaverServerMdoal() {
+function DeleteChannelModel() {
   const [isMounted, setIsMounted] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { isDialogBoxOpen, setIsDialogBoxOpen, user } =
-    useUserContextProvider();
+  const { isDialogBoxOpen, setIsDialogBoxOpen } = useUserContextProvider();
   const { serverId }: { serverId: string } = useParams();
-  const { serverShortInfo } = useServerContext();
-  const router = useRouter();
+  const { setIsChanged, serverChannelInfo } = useServerContext();
 
   useEffect(() => {
     setIsMounted(true);
@@ -31,22 +29,25 @@ function LeaverServerMdoal() {
   const onOpenChange = useCallback(() => {
     setIsDialogBoxOpen({
       status: false,
-      type: "Leave Server",
+      type: "Delete Channel",
     });
   }, []);
 
   const onConfirmClick = useCallback(async () => {
-    if (serverId && user?.email) {
+    if (serverId && serverChannelInfo?._id) {
       setIsLoading(true);
-      const leaveFromTheServer = (await import("@/lib/db")).leaveFromTheServer;
-      const res = await leaveFromTheServer(serverId, user.email);
+      const deleteChannel = (await import("@/lib/db")).deleteChannel;
+      const res = await deleteChannel(serverChannelInfo._id, serverId);
       if (res.success) {
         setIsLoading(false);
-        router.push("/servers");
-        router.refresh();
+        setIsDialogBoxOpen({
+          status: false,
+          type: "Delete Channel",
+        });
+        setIsChanged((prev) => !prev);
       }
     }
-  }, [user]);
+  }, [serverChannelInfo]);
 
   if (!isMounted) {
     return null;
@@ -54,18 +55,18 @@ function LeaverServerMdoal() {
 
   return (
     <Dialog
-      open={isDialogBoxOpen.type === "Leave Server" && isDialogBoxOpen.status}
+      open={isDialogBoxOpen.type === "Delete Channel" && isDialogBoxOpen.status}
       onOpenChange={onOpenChange}
     >
       <DialogContent className="bg-white text-black">
         <DialogHeader className="px-6">
           <DialogTitle className="text-center my-4 text-xl sm:text-2xl">
-            Leave Server
+            Delete Server
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="text-center text-zinc-500">
-          Are you sure you want to leave{" "}
-          <span className="font-semibold">{serverShortInfo?.name}</span> ?
+          Are you sure you want to delete the channel
+          <span className="font-semibold">{serverChannelInfo?.name}</span> ?
         </DialogDescription>
         <DialogFooter className="w-full px-4">
           <div className="w-full flex items-center justify-between">
@@ -91,4 +92,4 @@ function LeaverServerMdoal() {
   );
 }
 
-export default memo(LeaverServerMdoal);
+export default memo(DeleteChannelModel);

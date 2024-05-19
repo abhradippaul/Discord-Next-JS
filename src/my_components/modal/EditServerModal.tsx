@@ -21,7 +21,6 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
-import { isServerExist, updateServerInfo } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import { useParams } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
@@ -39,6 +38,7 @@ function EditServerModal() {
 
   const debounced = useCallback(
     useDebouncedCallback(async (value: string) => {
+      const isServerExist = (await import("@/lib/db")).isServerExist;
       const res = await isServerExist(value.trim());
       if (res) {
         setIsServerUnique(!res.success);
@@ -87,6 +87,7 @@ function EditServerModal() {
   const onSubmit = useCallback(
     async (values: { name: string; imageUrl: string }) => {
       if (values.imageUrl && values.name) {
+        const updateServerInfo = (await import("@/lib/db")).updateServerInfo;
         if (
           values.name !== serverShortInfo?.name ||
           values.imageUrl !== serverShortInfo?.imageUrl

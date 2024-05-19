@@ -21,7 +21,6 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
-import { createServer, isServerExist } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -53,6 +52,7 @@ function InitialModal() {
 
   const onSubmit = useCallback(
     async (values: { name: string; imageUrl: string }) => {
+      const createServer = (await import("@/lib/db")).createServer;
       const res = await createServer(values.name, values.imageUrl, user.email);
       if (res.success) {
         router.push(`/servers/${res.data.isServerCreated._id}`);
@@ -63,6 +63,7 @@ function InitialModal() {
 
   const onChangeServerName = useCallback(async (e: string) => {
     if (e) {
+      const isServerExist = (await import("@/lib/db")).isServerExist;
       const res = await isServerExist(e.trim());
       if (res) {
         setIsServerUnique(!res.success);

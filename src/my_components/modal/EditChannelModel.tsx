@@ -32,11 +32,11 @@ import {
 } from "@/components/ui/select";
 import { useServerContext } from "@/components/providers/ServerInfoContext";
 
-function CreateServerModal() {
+function EditChannelModel() {
   const [isMounted, setIsMounted] = useState(false);
   const { isDialogBoxOpen, setIsDialogBoxOpen } = useUserContextProvider();
   const { serverId }: { serverId: string } = useParams();
-  const { setIsChanged } = useServerContext();
+  const { setIsChanged, serverChannelInfo } = useServerContext();
 
   enum ChannelTypes {
     TEXT = "TEXT",
@@ -51,16 +51,17 @@ function CreateServerModal() {
 
   useEffect(() => {
     setIsMounted(true);
-    if (isDialogBoxOpen?.channelType) {
-      form.setValue("type", ChannelTypes[isDialogBoxOpen.channelType]);
+    if (serverChannelInfo?.name && serverChannelInfo.type) {
+      form.setValue("name", serverChannelInfo?.name);
+      form.setValue("type", ChannelTypes[serverChannelInfo?.type]);
     }
-  }, [isDialogBoxOpen]);
+  }, [serverChannelInfo]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      type: ChannelTypes.TEXT,
+      type: ChannelTypes["TEXT"],
     },
   });
 
@@ -68,18 +69,36 @@ function CreateServerModal() {
 
   const onSubmit = useCallback(
     async (values: { name: string; type: ChannelTypes }) => {
-      const createChannel = (await import("@/lib/db")).createChannel;
-      const res = await createChannel(serverId, values.name, values.type);
-      if (res?.success) {
-        setIsDialogBoxOpen({
-          status: false,
-          type: "Create Channel",
-        });
-        form.reset();
-        setIsChanged((prev) => !prev);
+      if (serverChannelInfo) {
+        const updateChannel = (await import("@/lib/db")).updateChannel;
+        let res;
+        if (
+          values.name !== serverChannelInfo?.name &&
+          values.type !== serverChannelInfo.type
+        ) {
+          res = await updateChannel(serverChannelInfo._id, serverId, {
+            name: values.name,
+            type: values.type,
+          });
+        } else if (values.name !== serverChannelInfo?.name) {
+          res = await updateChannel(serverChannelInfo._id, serverId, {
+            name: values.name,
+          });
+        } else if (values.type !== serverChannelInfo.type) {
+          res = await updateChannel(serverChannelInfo._id, serverId, {
+            type: values.type,
+          });
+        }
+        if (res.success) {
+          setIsChanged((prev) => !prev);
+          setIsDialogBoxOpen({
+            status: false,
+            type: "Edit Channel",
+          });
+        }
       }
     },
-    []
+    [serverChannelInfo]
   );
 
   const onOpenChange = useCallback(() => {
@@ -96,13 +115,13 @@ function CreateServerModal() {
 
   return (
     <Dialog
-      open={isDialogBoxOpen.type === "Create Channel" && isDialogBoxOpen.status}
+      open={isDialogBoxOpen.type === "Edit Channel" && isDialogBoxOpen.status}
       onOpenChange={onOpenChange}
     >
       <DialogContent className="bg-white text-black">
         <DialogHeader className="px-6">
           <DialogTitle className="text-center my-4 text-xl sm:text-2xl">
-            CREATE CHANNEL
+            Edit Channel
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -158,11 +177,12 @@ function CreateServerModal() {
                 variant="primary"
                 className="w-full text-lg sm:text-xl"
                 disabled={
-                  isLoading || !Boolean(form?.getValues("name")?.length)
+                  isLoading ||
+                  form?.getValues("name") === serverChannelInfo?.name
                 }
               >
                 {isLoading && <Loader2 className="animate-spin size-4 mr-4" />}
-                Create
+                Update
               </Button>
             </DialogFooter>
           </form>
@@ -172,4 +192,4 @@ function CreateServerModal() {
   );
 }
 
-export default memo(CreateServerModal);
+export default memo(EditChannelModel);

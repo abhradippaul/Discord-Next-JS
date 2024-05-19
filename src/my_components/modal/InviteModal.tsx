@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
-import { createServerInviteCode } from "@/lib/db";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -51,6 +50,8 @@ function InviteModal() {
 
   const onClickCreateInviteCode = useCallback(async () => {
     setIsLoading(true);
+    const createServerInviteCode = (await import("@/lib/db"))
+      .createServerInviteCode;
     const response = await createServerInviteCode(serverId);
     if (response?.success) {
       setInviteLink(response.inviteCode);

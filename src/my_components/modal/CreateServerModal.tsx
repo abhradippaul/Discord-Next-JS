@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,15 +20,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { memo, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import FileUpload from "../file-upload";
 import { Loader2 } from "lucide-react";
-import { createServer, isServerExist } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebouncedCallback } from "use-debounce";
+const FileUpload = dynamic(() => import("../file-upload"), { ssr: false });
 
 function CreateServerModal() {
   const [isMounted, setIsMounted] = useState(false);
@@ -35,10 +35,10 @@ function CreateServerModal() {
   const { user, isDialogBoxOpen, setIsDialogBoxOpen } =
     useUserContextProvider();
   const router = useRouter();
-  const { serverId } = useParams();
 
   const debounced = useCallback(
     useDebouncedCallback(async (userName: string) => {
+      const isServerExist = (await import("@/lib/db")).isServerExist;
       const res = await isServerExist(userName);
       setIsServerUnique(!res?.success);
     }, 1000),
@@ -67,6 +67,7 @@ function CreateServerModal() {
   const onSubmit = useCallback(
     async (values: { name: string; imageUrl: string }) => {
       if (values.imageUrl && values.name) {
+        const createServer = (await import("@/lib/db")).createServer;
         const res = await createServer(
           values.name,
           values.imageUrl,

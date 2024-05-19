@@ -1,15 +1,16 @@
 "use client";
+
+import dynamic from "next/dynamic";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import NavigationAction from "./NavigationAction";
-import { getUserInfo } from "@/lib/db";
 import { useUserContextProvider } from "@/components/providers/UserContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { ModeToggle } from "@/components/Mode-toggle";
-import CreateServerModal from "../modal/CreateServerModal";
 import EachServerElement from "./EachServerElement";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const CreateServerModal = dynamic(() => import("../modal/CreateServerModal"));
 
 export interface ServerProps {
   role: string;
@@ -29,6 +30,7 @@ function NavigationSidebar() {
 
   const getUserAndServerInfo = useCallback(async (userEmail: string) => {
     if (userEmail) {
+      const getUserInfo = (await import("@/lib/db")).getUserInfo;
       const res = await getUserInfo(userEmail);
       if (res.success) {
         setServers(res.data.Server);
@@ -47,7 +49,7 @@ function NavigationSidebar() {
   }, [user]);
 
   return (
-    <nav className="flex flex-col items-center min-h-dvh dark:bg-[#1E1F22] py-3">
+    <nav className="flex flex-col items-center min-h-dvh bg-[#E3E5E8] dark:bg-[#1E1F22] py-3">
       <NavigationAction />
       <CreateServerModal />
       <div className="w-10 h-[2px] rounded-md my-4 bg-zinc-300 dark:bg-zinc-700"></div>

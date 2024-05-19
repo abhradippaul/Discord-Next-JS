@@ -26,9 +26,11 @@ interface DialogBoxValue {
     | "Manage Member"
     | "Create Channel"
     | "Leave Server"
-    | "Delete Server";
+    | "Delete Server"
+    | "Delete Channel"
+    | "Edit Channel";
   status: boolean;
-  channelType? : "TEXT" | "AUDIO" | "VIDEO"
+  channelType?: "TEXT" | "AUDIO" | "VIDEO";
 }
 
 interface UserContextValue {
